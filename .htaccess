@@ -1,0 +1,40 @@
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# API Routes
+RewriteRule ^api/auth/login$ api/auth/login.php [L]
+RewriteRule ^api/auth/register$ api/auth/register.php [L]
+RewriteRule ^api/auth/me$ api/auth/me.php [L]
+RewriteRule ^api/pets$ api/pets/index.php [L]
+RewriteRule ^api/pets/create$ api/pets/create.php [L]
+RewriteRule ^api/rfid/scan$ api/rfid/scan.php [L]
+RewriteRule ^api/infractions$ api/infractions/index.php [L]
+
+# Dashboard Routes
+RewriteRule ^dashboard$ dashboard/index.php [L]
+RewriteRule ^dashboard/pets$ dashboard/pets/index.php [L]
+RewriteRule ^dashboard/pets/new$ dashboard/pets/new.php [L]
+RewriteRule ^dashboard/pets/([0-9a-zA-Z_]+)$ dashboard/pets/view.php?id=$1 [L]
+RewriteRule ^dashboard/users$ dashboard/users/index.php [L]
+RewriteRule ^dashboard/infractions$ dashboard/infractions/index.php [L]
+RewriteRule ^dashboard/infractions/new$ dashboard/infractions/new.php [L]
+
+# Auth Routes
+RewriteRule ^login$ auth/login.php [L]
+RewriteRule ^register$ auth/register.php [L]
+RewriteRule ^logout$ auth/logout.php [L]
+
+# Public Routes
+RewriteRule ^rfid-scanner$ rfid-scanner/index.php [L]
+
+# Security
+<Files "config/*">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+<Files "includes/*">
+    Order Allow,Deny
+    Deny from all
+</Files>
