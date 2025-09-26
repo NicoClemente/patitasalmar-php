@@ -514,3 +514,346 @@ style.textContent = `
 document.head.appendChild(style);
 
 console.log('🐾 PatitasAlMar JavaScript cargado');
+
+class PatitasScanner {
+            constructor() {
+                this.initializeElements();
+                this.bindEvents();
+                this.setupAutoFocus();
+            }
+
+            initializeElements() {
+                this.rfidInput = document.getElementById('rfidInput');
+                this.scanBtn = document.getElementById('scanBtn');
+                this.loadingState = document.getElementById('loadingState');
+                this.errorState = document.getElementById('errorState');
+                this.successState = document.getElementById('successState');
+                
+                // Pet info elements
+                this.petAvatar = document.getElementById('petAvatar');
+                this.petName = document.getElementById('petName');
+                this.petSpecies = document.getElementById('petSpecies');
+                this.petAge = document.getElementById('petAge');
+                this.petRfid = document.getElementById('petRfid');
+                this.petRegistered = document.getElementById('petRegistered');
+                this.petDescription = document.getElementById('petDescription');
+                
+                // Owner info elements
+                this.ownerName = document.getElementById('ownerName');
+                this.ownerEmail = document.getElementById('ownerEmail');
+                this.ownerPhone = document.getElementById('ownerPhone');
+                
+                // Action buttons
+                this.callBtn = document.getElementById('callBtn');
+                this.emailBtn = document.getElementById('emailBtn');
+                this.shareBtn = document.getElementById('shareBtn');
+            }
+
+            bindEvents() {
+                this.scanBtn.addEventListener('click', () => this.handleScan());
+                this.rfidInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.handleScan();
+                    }
+                });
+                
+                // Auto-uppercase and sanitize input
+                this.rfidInput.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                });
+                
+                // Auto-submit after delay
+                this.setupAutoSubmit();
+            }
+
+            setupAutoFocus() {
+                this.rfidInput.focus();
+                
+                // Focus on any alphanumeric key press
+                document.addEventListener('keydown', (e) => {
+                    if (document.activeElement !== this.rfidInput && /^[a-zA-Z0-9]$/.test(e.key)) {
+                        this.rfidInput.focus();
+                        this.rfidInput.value = '';
+                    }
+                });
+            }
+
+            setupAutoSubmit() {
+                let autoSubmitTimer;
+                this.rfidInput.addEventListener('input', () => {
+                    clearTimeout(autoSubmitTimer);
+                    autoSubmitTimer = setTimeout(() => {
+                        const value = this.rfidInput.value.trim();
+                        if (value.length >= 4) {
+                            this.handleScan();
+                        }
+                    }, 1500);
+                });
+            }
+
+            async handleScan() {
+                const rfidTag = this.rfidInput.value.trim();
+                
+                if (!rfidTag) {
+                    this.showError('Por favor ingresa un código RFID');
+                    this.rfidInput.focus();
+                    return;
+                }
+                
+                if (!/^[A-Z0-9]{3,20}$/.test(rfidTag)) {
+                    this.showError('El código debe tener entre 3 y 20 caracteres (solo letras y números)');
+                    this.rfidInput.focus();
+                    return;
+                }
+                
+                await this.performScan(rfidTag);
+            }
+
+            async performScan(rfidTag) {
+                this.showLoading();
+                
+                try {
+                    // Simular API call - En producción usar fetch real
+                    await this.sleep(2000);
+                    
+                    // Mock data para demostración
+                    const mockPet = {
+                        success: Math.random() > 0.3, // 70% éxito para demo
+                        pet: {
+                            name: 'Luna',
+                            species: 'Perro',
+                            breed: 'Golden Retriever',
+                            age: 3,
+                            rfid_tag: rfidTag,
+                            description: 'Perra muy cariñosa, le gusta jugar en la playa. Responde a su nombre y es muy sociable con otros perros.',
+                            registered_date: '2025-01-15',
+                            owner: {
+                                name: 'María González',
+                                email: 'maria@ejemplo.com',
+                                phone: '+542920123456'
+                            }
+                        }
+                    };
+                    
+                    if (mockPet.success) {
+                        this.showSuccess(mockPet.pet);
+                    } else {
+                        this.showError('Mascota no encontrada');
+                    }
+                    
+                } catch (error) {
+                    this.showError('Error de conexión. Verifica tu internet.');
+                }
+            }
+
+            showLoading() {
+                this.hideAllStates();
+                this.loadingState.classList.remove('hidden');
+                this.scanBtn.disabled = true;
+                this.scanBtn.innerHTML = '<div class="spinner" style="width: 16px; height: 16px; margin-right: 0.5rem;"></div>Buscando...';
+            }
+
+            showError(message) {
+                this.hideAllStates();
+                this.errorState.classList.remove('hidden');
+                this.errorState.querySelector('h3').textContent = message;
+                this.resetScanButton();
+                this.scrollToResult();
+            }
+
+            showSuccess(pet) {
+                this.hideAllStates();
+                this.populatePetInfo(pet);
+                this.setupContactActions(pet.owner);
+                this.successState.classList.remove('hidden');
+                this.resetScanButton();
+                this.scrollToResult();
+            }
+
+            populatePetInfo(pet) {
+                // Basic info
+                this.petName.textContent = pet.name;
+                this.petSpecies.textContent = `${this.getSpeciesEmoji(pet.species)} ${pet.species}${pet.breed ? ` ${pet.breed}` : ''}`;
+                this.petAge.textContent = pet.age ? `${pet.age} años` : 'No especificada';
+                this.petRfid.textContent = pet.rfid_tag;
+                this.petRegistered.textContent = this.formatDate(pet.registered_date);
+                this.petDescription.textContent = pet.description || 'Sin descripción disponible';
+                
+                // Avatar
+                this.petAvatar.textContent = this.getSpeciesEmoji(pet.species);
+                
+                // Owner info
+                this.ownerName.textContent = pet.owner.name;
+                this.ownerEmail.textContent = pet.owner.email;
+                this.ownerEmail.href = `mailto:${pet.owner.email}`;
+                this.ownerPhone.textContent = pet.owner.phone;
+                this.ownerPhone.href = `tel:${pet.owner.phone}`;
+            }
+
+            setupContactActions(owner) {
+                this.callBtn.onclick = () => {
+                    window.open(`tel:${owner.phone}`, '_self');
+                    this.trackAction('call', owner.phone);
+                };
+                
+                this.emailBtn.onclick = () => {
+                    const subject = 'Encontré a tu mascota registrada en PatitasAlMar';
+                    const body = 'Hola,\n\nEncontré a tu mascota y busqué su información usando el código RFID. Por favor contacta conmigo para coordinar la devolución.\n\nSaludos.';
+                    window.open(`mailto:${owner.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_self');
+                    this.trackAction('email', owner.email);
+                };
+                
+                this.shareBtn.onclick = () => {
+                    this.shareInfo(owner);
+                };
+            }
+
+            async shareInfo(owner) {
+                const shareText = `🐾 Encontré una mascota registrada en PatitasAlMar\n\nContacto del dueño:\n📞 ${owner.phone}\n✉️ ${owner.email}\n\nEscaneado en: ${window.location.origin}`;
+                
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: 'Información de mascota encontrada',
+                            text: shareText,
+                            url: window.location.href
+                        });
+                        this.trackAction('share_native');
+                    } catch (error) {
+                        console.log('Share cancelled');
+                    }
+                } else {
+                    await this.copyToClipboard(shareText);
+                    this.showNotification('📤 Información copiada para compartir', 'success');
+                    this.trackAction('share_copy');
+                }
+            }
+
+            hideAllStates() {
+                this.loadingState.classList.add('hidden');
+                this.errorState.classList.add('hidden');
+                this.successState.classList.add('hidden');
+            }
+
+            resetScanButton() {
+                this.scanBtn.disabled = false;
+                this.scanBtn.innerHTML = '🔍 Buscar';
+            }
+
+            scrollToResult() {
+                setTimeout(() => {
+                    const visibleResult = document.querySelector('.result-card:not(.hidden)');
+                    if (visibleResult) {
+                        visibleResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 100);
+            }
+
+            // Utility methods
+            getSpeciesEmoji(species) {
+                const emojis = {
+                    'perro': '🐕',
+                    'gato': '🐱',
+                    'ave': '🐦',
+                    'conejo': '🐰',
+                    'pez': '🐟',
+                    'reptil': '🦎',
+                    'hamster': '🐹'
+                };
+                return emojis[species.toLowerCase()] || '🐾';
+            }
+
+            formatDate(dateString) {
+                return new Date(dateString).toLocaleDateString('es-AR', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
+            }
+
+            async copyToClipboard(text) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                } catch (err) {
+                    // Fallback
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                }
+            }
+
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 p-4 rounded-2xl shadow-2xl z-50 max-w-sm`;
+                notification.style.animation = 'slideIn 0.3s ease';
+                
+                const colors = {
+                    success: 'background: var(--gradient-primary); color: white;',
+                    error: 'background: var(--error); color: white;',
+                    info: 'background: var(--info); color: white;'
+                };
+                
+                notification.style.cssText = colors[type] || colors.info;
+                notification.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span style="font-size: 1.25rem;">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                        <span style="font-weight: 600;">${message}</span>
+                        <button onclick="this.parentElement.parentElement.remove()" 
+                                style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1.25rem; margin-left: auto;">×</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.style.animation = 'slideOut 0.3s ease forwards';
+                        setTimeout(() => notification.remove(), 300);
+                    }
+                }, 4000);
+            }
+
+            trackAction(action, data = null) {
+                // Analytics tracking - implementar según necesidades
+                console.log(`Action: ${action}`, data);
+            }
+
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+
+        // Initialize app when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            new PatitasScanner();
+            
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+        });
+
+        // Add slide animations
+        const slideAnimations = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = slideAnimations;
+        document.head.appendChild(styleSheet);
