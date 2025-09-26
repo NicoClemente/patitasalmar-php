@@ -25,7 +25,7 @@ async function handleLogin(e) {
     errorDiv.style.display = 'none';
     
     try {
-        const response = await fetch('/api/auth/login', {
+        const response = await fetch('/patitasalmar-php/api/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -37,7 +37,7 @@ async function handleLogin(e) {
         
         if (data.success) {
             // Redirigir al dashboard
-            window.location.href = '/dashboard';
+            window.location.href = '/patitasalmar-php/dashboard';
         } else {
             errorDiv.textContent = data.message || 'Error al iniciar sesión';
             errorDiv.style.display = 'block';
@@ -80,7 +80,7 @@ async function handleRegister(e) {
     errorDiv.style.display = 'none';
     
     try {
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch('/patitasalmar-php/api/auth/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -108,7 +108,7 @@ async function handleRegister(e) {
 
 async function handleLoginAfterRegister(email, password) {
     try {
-        const response = await fetch('/api/auth/login', {
+        const response = await fetch('/patitasalmar-php/api/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -119,10 +119,10 @@ async function handleLoginAfterRegister(email, password) {
         const data = await response.json();
         
         if (data.success) {
-            window.location.href = '/dashboard';
+            window.location.href = '/patitasalmar-php/dashboard';
         }
     } catch (error) {
         // Si falla el auto-login, redirigir a login manual
-        window.location.href = '/login';
+        window.location.href = '/patitasalmar-php/login';
     }
 }

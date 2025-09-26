@@ -10,6 +10,6 @@ if (isset($_COOKIE[session_name()])) {
 }
 
 // Redirigir al inicio
-header('Location: /');
+header('Location: /patitasalmar-php/');
 exit();
 ?>

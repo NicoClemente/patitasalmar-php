@@ -1,27 +1,39 @@
 RewriteEngine On
 RewriteBase /patitasalmar-php/
 
-# Archivos estáticos
+# Archivos estáticos (CSS, JS, imágenes)
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^ - [L]
+RewriteRule ^(assets|uploads)/ - [L]
 
 # API Routes
-RewriteRule ^api/auth/login/?$ api/auth/login.php [L]
-RewriteRule ^api/auth/register/?$ api/auth/register.php [L]
-RewriteRule ^api/pets/?$ api/pets/index.php [L]
-RewriteRule ^api/pets/create/?$ api/pets/create.php [L]
-RewriteRule ^api/rfid/scan/?$ api/rfid/scan.php [L]
+RewriteRule ^api/auth/login/?$ api/auth/login.php [L,QSA]
+RewriteRule ^api/auth/register/?$ api/auth/register.php [L,QSA]
+RewriteRule ^api/pets/?$ api/pets/index.php [L,QSA]
+RewriteRule ^api/pets/create/?$ api/pets/create.php [L,QSA]
+RewriteRule ^api/pets/delete/?$ api/pets/index.php [L,QSA]
+RewriteRule ^api/rfid/scan/?$ api/rfid/scan.php [L,QSA]
+RewriteRule ^api/dashboard/stats/?$ api/dashboard/stats.php [L,QSA]
+RewriteRule ^api/upload/photo/?$ api/upload/photo.php [L,QSA]
 
 # Auth Routes
-RewriteRule ^login/?$ auth/login.php [L]
-RewriteRule ^register/?$ auth/register.php [L]
-RewriteRule ^logout/?$ auth/logout.php [L]
+RewriteRule ^login/?$ auth/login.php [L,QSA]
+RewriteRule ^register/?$ auth/register.php [L,QSA]
+RewriteRule ^logout/?$ auth/logout.php [L,QSA]
 
 # Dashboard Routes
-RewriteRule ^dashboard/?$ dashboard/index.php [L]
-RewriteRule ^dashboard/pets/?$ dashboard/pets/index.php [L]
-RewriteRule ^dashboard/pets/new/?$ dashboard/pets/new.php [L]
+RewriteRule ^dashboard/?$ dashboard/index.php [L,QSA]
+RewriteRule ^dashboard/pets/?$ dashboard/pets/index.php [L,QSA]
+RewriteRule ^dashboard/pets/new/?$ dashboard/pets/new.php [L,QSA]
+RewriteRule ^dashboard/users/?$ dashboard/users/index.php [L,QSA]
 
 # Public Routes
-RewriteRule ^rfid-scanner/?$ rfid-scanner/index.php [L]
+RewriteRule ^rfid-scanner/?$ rfid-scanner/index.php [L,QSA]
+
+# Root route
+RewriteRule ^$ index.php [L,QSA]
+
+# 404 for unmatched routes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ error.php?404 [L,QSA]

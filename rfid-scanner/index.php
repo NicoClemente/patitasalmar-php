@@ -1,5 +1,5 @@
 <?php
-$pageTitle = "Escáner RFID";
+$pageTitle = "Escáner RFID/NFC";
 $hideHeader = true;
 include '../includes/header.php';
 ?>
@@ -12,37 +12,91 @@ include '../includes/header.php';
                 <div class="animate-float mb-4">
                     <span style="font-size: 4rem;">🔍</span>
                 </div>
-                <h1 class="text-4xl font-bold text-gray-800 mb-4">Escáner RFID</h1>
+                <h1 class="text-4xl font-bold text-gray-800 mb-4">Escáner RFID/NFC</h1>
                 <p class="text-gray-600 mb-4">
-                    Escanea el tag RFID para encontrar información de la mascota perdida
+                    Escanea el tag RFID/NFC para encontrar información de la mascota perdida
                 </p>
                 <div class="flex justify-center gap-4 text-sm">
-                    <a href="/" class="text-blue-600 hover:text-blue-500">← Volver al inicio</a>
+                    <a href="/patitasalmar-php/" class="text-blue-600 hover:text-blue-500">← Volver al inicio</a>
                     <span class="text-gray-300">|</span>
-                    <a href="/login" class="text-blue-600 hover:text-blue-500">¿Tienes cuenta?</a>
+                    <a href="/patitasalmar-php/login" class="text-blue-600 hover:text-blue-500">¿Tienes cuenta?</a>
                 </div>
             </div>
 
-            <!-- Escáner principal -->
+            <!-- Compatibilidad NFC -->
+            <div id="nfcSupport" class="card mb-4" style="border: 2px solid #10b981; background: #f0fdf4; display: none;">
+                <div class="text-center">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📱</div>
+                    <h3 class="text-lg font-semibold text-green-800 mb-2">NFC Disponible</h3>
+                    <p class="text-sm text-green-700 mb-3">
+                        Tu dispositivo puede escanear tags NFC automáticamente
+                    </p>
+                    <button id="enableNFC" class="btn btn-primary">
+                        📡 Activar Escáner NFC
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sin compatibilidad NFC -->
+            <div id="noNfcSupport" class="card mb-4" style="border: 2px solid #f59e0b; background: #fffbeb; display: none;">
+                <div class="text-center">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚠️</div>
+                    <h3 class="text-lg font-semibold text-orange-800 mb-2">NFC No Disponible</h3>
+                    <p class="text-sm text-orange-700">
+                        Usa Chrome en Android o ingresa el código manualmente
+                    </p>
+                </div>
+            </div>
+
+            <!-- Estado de escáner NFC -->
+            <div id="nfcActive" class="card mb-6" style="border: 2px solid #3b82f6; background: #eff6ff; display: none;">
+                <div class="text-center py-8">
+                    <div class="nfc-animation mb-4">
+                        <div class="nfc-waves">
+                            <div class="wave"></div>
+                            <div class="wave"></div>
+                            <div class="wave"></div>
+                        </div>
+                        <div style="font-size: 3rem;">📱</div>
+                    </div>
+                    <h3 class="text-xl font-semibold text-blue-800 mb-2">Escáner NFC Activo</h3>
+                    <p class="text-blue-700 mb-4">Acerca el tag NFC a la parte trasera de tu teléfono</p>
+                    <button id="stopNFC" class="btn btn-secondary">
+                        ⏹️ Detener Escáner
+                    </button>
+                </div>
+            </div>
+
+            <!-- Escáner manual -->
             <div class="card mb-6" style="border: 2px solid #3b82f6;">
                 <div class="text-center mb-4">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-2">🏷️ Ingresa el código RFID</h3>
-                    <p class="text-gray-600 text-sm">Busca el tag en el collar de la mascota</p>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">🏷️ Ingresa el código RFID/NFC</h3>
+                    <p class="text-gray-600 text-sm">También puedes escribir el código manualmente</p>
                 </div>
                 
                 <div class="space-y-4">
                     <div class="flex gap-2">
                         <input type="text" id="rfidInput" class="form-input text-center text-lg font-mono" 
-                               placeholder="Ej: LUNA001, PET1234, etc." maxlength="20" style="flex: 1;">
+                               placeholder="Ej: LUNA001, PET1234, etc." maxlength="50" style="flex: 1;">
                         <button id="scanButton" class="btn btn-primary text-lg px-6">
                             🔍 Buscar
                         </button>
                     </div>
                     
                     <div class="text-center">
-                        <p class="text-gray-500 text-sm">
-                            💡 También puedes usar un lector RFID conectado por USB
+                        <p class="text-gray-500 text-sm mb-2">
+                            💡 El código puede estar en texto o grabado en el tag
                         </p>
+                        
+                        <!-- Botones de método de escaneo -->
+                        <div class="flex gap-2 justify-center mt-3">
+                            <button id="nfcScanBtn" class="btn btn-secondary btn-sm" style="display: none;">
+                                📱 Escanear NFC
+                            </button>
+                            <button id="cameraScanBtn" class="btn btn-secondary btn-sm">
+                                📷 Escanear QR
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -125,24 +179,42 @@ include '../includes/header.php';
             <!-- Instrucciones de uso -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
                 <div class="card" style="background: #f0f9ff; border: 1px solid #0ea5e9;">
-                    <h4 class="font-semibold text-blue-800 mb-3">🔍 ¿Cómo usar el escáner?</h4>
+                    <h4 class="font-semibold text-blue-800 mb-3">📱 Escaneo con NFC</h4>
                     <ol class="text-sm text-blue-700 space-y-1">
-                        <li>1. Busca el collar de la mascota</li>
-                        <li>2. Encuentra el tag RFID (pequeño llavero)</li>
-                        <li>3. Ingresa el código que aparece en el tag</li>
-                        <li>4. Presiona "Buscar"</li>
-                        <li>5. Contacta al dueño con la información</li>
+                        <li>1. Activa el escáner NFC</li>
+                        <li>2. Acerca el tag al teléfono</li>
+                        <li>3. Mantén contacto 1-2 segundos</li>
+                        <li>4. La información aparecerá automáticamente</li>
+                    </ol>
+                </div>
+                
+                <div class="card" style="background: #f0fdf4; border: 1px solid #22c55e;">
+                    <h4 class="font-semibold text-green-800 mb-3">✍️ Ingreso manual</h4>
+                    <ol class="text-sm text-green-700 space-y-1">
+                        <li>1. Busca el código en el tag</li>
+                        <li>2. Escríbelo en el campo de texto</li>
+                        <li>3. Presiona "Buscar"</li>
+                        <li>4. Contacta al dueño</li>
                     </ol>
                 </div>
                 
                 <div class="card" style="background: #fefce8; border: 1px solid #eab308;">
                     <h4 class="font-semibold text-yellow-800 mb-3">⚠️ ¿No funciona?</h4>
                     <ul class="text-sm text-yellow-700 space-y-1">
-                        <li>• Verifica que hayas escrito bien el código</li>
-                        <li>• El tag puede estar dañado o sucio</li>
-                        <li>• La mascota puede no estar registrada</li>
-                        <li>• Contacta a las autoridades locales</li>
-                        <li>• Publica en redes sociales con foto</li>
+                        <li>• Verifica que NFC esté activado</li>
+                        <li>• Usa Chrome en Android</li>
+                        <li>• El tag puede estar dañado</li>
+                        <li>• Intenta ingreso manual</li>
+                    </ul>
+                </div>
+                
+                <div class="card" style="background: #fdf2f8; border: 1px solid #ec4899;">
+                    <h4 class="font-semibold text-pink-800 mb-3">🚨 Emergencia</h4>
+                    <ul class="text-sm text-pink-700 space-y-1">
+                        <li>• Si no encuentras al dueño</li>
+                        <li>• Contacta autoridades locales</li>
+                        <li>• Publica en redes sociales</li>
+                        <li>• Lleva a veterinaria cercana</li>
                     </ul>
                 </div>
             </div>
@@ -156,8 +228,8 @@ include '../includes/header.php';
                         Ayudamos a reunir familias con sus mascotas perdidas.
                     </p>
                     <div class="flex justify-center gap-4">
-                        <a href="/register" class="btn btn-secondary btn-sm">Registrar mi mascota</a>
-                        <a href="/" class="btn btn-secondary btn-sm">Más información</a>
+                        <a href="/patitasalmar-php/register" class="btn btn-secondary btn-sm">Registrar mi mascota</a>
+                        <a href="/patitasalmar-php/" class="btn btn-secondary btn-sm">Más información</a>
                     </div>
                 </div>
             </div>
@@ -180,6 +252,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorDiv = document.getElementById('error');
     const foundDiv = document.getElementById('found');
     
+    // Elementos NFC
+    const nfcSupport = document.getElementById('nfcSupport');
+    const noNfcSupport = document.getElementById('noNfcSupport');
+    const nfcActive = document.getElementById('nfcActive');
+    const enableNFC = document.getElementById('enableNFC');
+    const stopNFC = document.getElementById('stopNFC');
+    const nfcScanBtn = document.getElementById('nfcScanBtn');
+    
+    let nfcReader = null;
+    let isNFCReading = false;
+    
+    // Verificar soporte NFC al cargar la página
+    checkNFCSupport();
+    
     // Auto-focus en el campo RFID
     rfidInput.focus();
     
@@ -196,22 +282,198 @@ document.addEventListener('DOMContentLoaded', function() {
         this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     });
 
+    // Botones NFC
+    if (enableNFC) enableNFC.addEventListener('click', startNFCReading);
+    if (stopNFC) stopNFC.addEventListener('click', stopNFCReading);
+    if (nfcScanBtn) nfcScanBtn.addEventListener('click', startNFCReading);
+
     // Cargar estadísticas al inicio
     loadStats();
 
+    // Verificar soporte de Web NFC API
+    function checkNFCSupport() {
+        if ('NDEFReader' in window) {
+            nfcSupport.style.display = 'block';
+            nfcScanBtn.style.display = 'inline-block';
+            console.log('✅ NFC soportado');
+        } else {
+            noNfcSupport.style.display = 'block';
+            console.log('❌ NFC no soportado');
+        }
+    }
+
+    // Iniciar lectura NFC
+    async function startNFCReading() {
+        if (!('NDEFReader' in window)) {
+            alert('❌ NFC no disponible. Usa Chrome en Android con NFC activado.');
+            return;
+        }
+
+        if (isNFCReading) {
+            return; // Ya está leyendo
+        }
+
+        try {
+            nfcReader = new NDEFReader();
+            
+            showNFCStatus('Solicitando permisos NFC...');
+            
+            await nfcReader.scan();
+            
+            console.log('✅ Escáner NFC iniciado');
+            isNFCReading = true;
+            
+            // Mostrar interfaz de escáner activo
+            nfcSupport.style.display = 'none';
+            nfcActive.style.display = 'block';
+            
+            // Escuchar lecturas NFC
+            nfcReader.addEventListener('reading', ({ message, serialNumber }) => {
+                console.log('📡 NFC detectado:', serialNumber);
+                handleNFCReading(message, serialNumber);
+            });
+
+            nfcReader.addEventListener('readingerror', (error) => {
+                console.error('❌ Error NFC:', error);
+                showNFCError('Error al leer el tag NFC. Inténtalo de nuevo.');
+            });
+
+        } catch (error) {
+            console.error('❌ Error iniciando NFC:', error);
+            
+            let errorMessage = 'No se pudo iniciar el escáner NFC. ';
+            
+            if (error.name === 'NotAllowedError') {
+                errorMessage += 'Permisos de NFC denegados.';
+            } else if (error.name === 'NotSupportedError') {
+                errorMessage += 'NFC no soportado en este dispositivo.';
+            } else {
+                errorMessage += 'Verifica que NFC esté activado.';
+            }
+            
+            alert(errorMessage);
+            isNFCReading = false;
+        }
+    }
+
+    // Detener lectura NFC
+    async function stopNFCReading() {
+        if (nfcReader) {
+            try {
+                // Note: No hay método oficial stop() en NDEFReader
+                // La lectura se detiene automáticamente cuando se pierde el foco
+                nfcReader = null;
+                isNFCReading = false;
+                
+                nfcActive.style.display = 'none';
+                nfcSupport.style.display = 'block';
+                
+                console.log('⏹️ Escáner NFC detenido');
+            } catch (error) {
+                console.error('Error deteniendo NFC:', error);
+            }
+        }
+    }
+
+    // Manejar lectura NFC exitosa
+    function handleNFCReading(message, serialNumber) {
+        console.log('📡 Datos NFC recibidos:', { message, serialNumber });
+        
+        let rfidCode = '';
+        
+        // Prioridad 1: Buscar en registros NDEF
+        if (message && message.records && message.records.length > 0) {
+            for (const record of message.records) {
+                if (record.recordType === 'text' && record.data) {
+                    const decoder = new TextDecoder();
+                    const text = decoder.decode(record.data);
+                    // Buscar patrón de código de mascota
+                    const match = text.match(/[A-Z0-9]{3,20}/);
+                    if (match) {
+                        rfidCode = match[0];
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Prioridad 2: Usar número de serie si no hay datos NDEF
+        if (!rfidCode && serialNumber) {
+            rfidCode = serialNumber.replace(/:/g, '').toUpperCase();
+            // Limitar longitud si es muy largo
+            if (rfidCode.length > 20) {
+                rfidCode = rfidCode.substring(0, 20);
+            }
+        }
+        
+        if (rfidCode) {
+            // Llenar campo y buscar automáticamente
+            rfidInput.value = rfidCode;
+            
+            // Feedback visual
+            showNFCSuccess(`📡 Tag NFC leído: ${rfidCode}`);
+            
+            // Detener escáner y buscar automáticamente
+            setTimeout(() => {
+                stopNFCReading();
+                handleScan();
+            }, 1000);
+            
+        } else {
+            showNFCError('Tag NFC detectado pero no contiene código de mascota válido.');
+        }
+    }
+
+    // Mostrar estado NFC
+    function showNFCStatus(message) {
+        console.log('ℹ️ NFC Status:', message);
+    }
+
+    function showNFCSuccess(message) {
+        console.log('✅ NFC Success:', message);
+        
+        // Mostrar notificación temporal
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50 animate-slide-in';
+        notification.innerHTML = `
+            <div class="flex items-center gap-2">
+                <span>✅</span>
+                <span>${message}</span>
+            </div>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 3000);
+    }
+
+    function showNFCError(message) {
+        console.error('❌ NFC Error:', message);
+        alert(`❌ ${message}`);
+    }
+
+    // Función de escaneo existente (mejorada)
     async function handleScan() {
         const rfidTag = rfidInput.value.trim();
         
         if (!rfidTag) {
-            showError('Por favor ingresa un código RFID');
+            showError('Por favor ingresa un código RFID/NFC');
             rfidInput.focus();
             return;
         }
         
-        if (!/^[A-Z0-9]{3,20}$/.test(rfidTag)) {
-            showError('El código debe tener entre 3 y 20 caracteres (solo letras y números)');
+        if (!/^[A-Z0-9]{3,50}$/.test(rfidTag)) {
+            showError('El código debe tener entre 3 y 50 caracteres (solo letras y números)');
             rfidInput.focus();
             return;
+        }
+        
+        // Detener NFC si está activo
+        if (isNFCReading) {
+            stopNFCReading();
         }
         
         // Mostrar loading
@@ -221,7 +483,7 @@ document.addEventListener('DOMContentLoaded', function() {
         scanButton.innerHTML = '<span class="loading-spinner"></span> Buscando...';
         
         try {
-            const response = await fetch('/api/rfid/scan', {
+            const response = await fetch('/patitasalmar-php/api/rfid/scan', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -248,6 +510,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Resto de funciones existentes...
     function hideAllResults() {
         loadingDiv.style.display = 'none';
         errorDiv.style.display = 'none';
@@ -350,8 +613,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (owner.email) {
             emailBtn.style.display = 'block';
             emailBtn.onclick = () => {
+        if (owner.email) {
+            emailBtn.style.display = 'block';
+            emailBtn.onclick = () => {
                 const subject = `Encontré a tu mascota registrada en PatitasAlMar`;
-                const body = `Hola,\n\nEncontré a tu mascota y busqué su información usando el código RFID. Por favor contacta conmigo para coordinar la devolución.\n\nSaludos.`;
+                const body = `Hola,\n\nEncontré a tu mascota y busqué su información usando el código RFID/NFC. Por favor contacta conmigo para coordinar la devolución.\n\nSaludos.`;
                 window.open(`mailto:${owner.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_self');
             };
         }
@@ -360,7 +626,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function setupShareButton(pet) {
         const shareBtn = document.getElementById('shareInfo');
         shareBtn.onclick = () => {
-            const shareText = `🐾 Encontré a ${pet.name} (${pet.species})\n\nRFID: ${pet.rfid_tag}\n\nContacto del dueño:\n${pet.owner ? `📞 ${pet.owner.phone || 'No disponible'}\n✉️ ${pet.owner.email || 'No disponible'}` : 'No disponible'}\n\nEscaneado en PatitasAlMar: ${window.location.origin}/rfid-scanner`;
+            const shareText = `🐾 Encontré a ${pet.name} (${pet.species})\n\nRFID/NFC: ${pet.rfid_tag}\n\nContacto del dueño:\n${pet.owner ? `📞 ${pet.owner.phone || 'No disponible'}\n✉️ ${pet.owner.email || 'No disponible'}` : 'No disponible'}\n\nEscaneado en PatitasAlMar: ${window.location.origin}/patitasalmar-php/rfid-scanner`;
             
             if (navigator.share) {
                 navigator.share({
@@ -377,7 +643,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function loadStats() {
         try {
-            const response = await fetch('/api/dashboard/stats');
+            const response = await fetch('/patitasalmar-php/api/dashboard/stats');
             const data = await response.json();
             
             if (data.success) {
@@ -447,6 +713,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 4000);
     }
+
+    // Manejo de parámetros URL (para enlaces desde homepage)
+    const urlParams = new URLSearchParams(window.location.search);
+    const rfidParam = urlParams.get('rfid');
+    if (rfidParam) {
+        rfidInput.value = rfidParam.toUpperCase();
+        // Auto-scan si viene de homepage
+        setTimeout(() => {
+            handleScan();
+        }, 500);
+    }
 });
 
 // Detectar si viene de un lector RFID USB
@@ -460,17 +737,52 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// Auto-submit después de que se deje de escribir por 1 segundo
+// Auto-submit después de que se deje de escribir por 1.5 segundos
 let autoSubmitTimer;
 document.getElementById('rfidInput').addEventListener('input', function() {
+    const scanButton = document.getElementById('scanButton');
+    
     clearTimeout(autoSubmitTimer);
     autoSubmitTimer = setTimeout(() => {
         const value = this.value.trim();
         if (value.length >= 4) {
-            document.getElementById('scanButton').click();
+            scanButton.click();
         }
     }, 1500);
 });
+
+// Manejar visibilidad de la página para NFC
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        // Página oculta - pausar NFC si es necesario
+        console.log('📱 Página oculta - NFC puede pausarse');
+    } else {
+        // Página visible - reanudar NFC
+        console.log('📱 Página visible - NFC activo');
+    }
+});
+
+// Wake Lock API para mantener la pantalla activa durante escaneo NFC
+let wakeLock = null;
+
+async function requestWakeLock() {
+    try {
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('🔒 Wake lock activado');
+        }
+    } catch (err) {
+        console.log('Wake lock no disponible:', err);
+    }
+}
+
+function releaseWakeLock() {
+    if (wakeLock) {
+        wakeLock.release();
+        wakeLock = null;
+        console.log('🔓 Wake lock liberado');
+    }
+}
 </script>
 
 <style>
@@ -499,6 +811,59 @@ document.getElementById('rfidInput').addEventListener('input', function() {
     to { transform: rotate(360deg); }
 }
 
+/* Animaciones NFC */
+.nfc-animation {
+    position: relative;
+    display: inline-block;
+}
+
+.nfc-waves {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    pointer-events: none;
+}
+
+.wave {
+    position: absolute;
+    border: 2px solid #3b82f6;
+    border-radius: 50%;
+    opacity: 0;
+    animation: nfc-pulse 2s infinite;
+}
+
+.wave:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.wave:nth-child(2) {
+    animation-delay: 0.5s;
+}
+
+.wave:nth-child(3) {
+    animation-delay: 1s;
+}
+
+@keyframes nfc-pulse {
+    0% {
+        width: 20px;
+        height: 20px;
+        opacity: 1;
+        top: 50px;
+        left: 50px;
+    }
+    100% {
+        width: 120px;
+        height: 120px;
+        opacity: 0;
+        top: 0;
+        left: 0;
+    }
+}
+
 /* Animación de entrada */
 @keyframes slide-in {
     from {
@@ -519,11 +884,14 @@ document.getElementById('rfidInput').addEventListener('input', function() {
 #rfidInput {
     letter-spacing: 1px;
     text-transform: uppercase;
+    font-weight: 600;
+    transition: all 0.3s ease;
 }
 
 #rfidInput:focus {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     border-color: #3b82f6;
+    transform: scale(1.02);
 }
 
 /* Estilos para códigos */
@@ -538,9 +906,45 @@ code {
     font-size: 0.875rem;
 }
 
+/* Estados de card interactiva */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
 /* Mejorar contraste de enlaces */
 a.text-blue-600:hover {
     text-decoration: underline;
+}
+
+/* Indicadores visuales para NFC */
+#nfcSupport {
+    animation: gentle-pulse 3s ease-in-out infinite;
+}
+
+@keyframes gentle-pulse {
+    0%, 100% { 
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+    50% { 
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+}
+
+#nfcActive {
+    animation: nfc-active-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes nfc-active-glow {
+    from {
+        box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    }
+    to {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+    }
 }
 
 /* Patrón de fondo animado */
@@ -557,23 +961,62 @@ a.text-blue-600:hover {
     right: 0;
     bottom: 0;
     background-image: 
-        radial-gradient(circle at 20% 80%, rgba(249, 115, 22, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(249, 115, 22, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(168, 85, 247, 0.03) 0%, transparent 50%);
     pointer-events: none;
-    animation: float 6s ease-in-out infinite;
+    animation: float 8s ease-in-out infinite;
 }
 
 @keyframes float {
     0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-10px) rotate(1deg); }
+    50% { transform: translateY(-15px) rotate(2deg); }
 }
 
 .animate-float {
-    animation: float 3s ease-in-out infinite;
+    animation: float 4s ease-in-out infinite;
 }
 
-/* Responsive */
+/* Estados de resultado mejorados */
+.result-card {
+    border-radius: 24px;
+    padding: 2rem;
+    text-align: center;
+    margin-top: 2rem;
+    animation: slideUp 0.5s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.result-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive improvements */
 @media (max-width: 768px) {
     .container {
         padding: 1rem;
@@ -594,28 +1037,112 @@ a.text-blue-600:hover {
     .gap-2 > * {
         margin-bottom: 0.5rem;
     }
+    
+    .nfc-waves {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .wave {
+        animation-duration: 1.5s;
+    }
+    
+    @keyframes nfc-pulse {
+        0% {
+            width: 15px;
+            height: 15px;
+            opacity: 1;
+            top: 32px;
+            left: 32px;
+        }
+        100% {
+            width: 80px;
+            height: 80px;
+            opacity: 0;
+            top: 0;
+            left: 0;
+        }
+    }
 }
 
-/* Accesibilidad */
+/* Mejoras de accesibilidad */
 @media (prefers-reduced-motion: reduce) {
     .animate-float,
     .paw-pattern::before,
     .loading-spinner,
-    .loading-spinner-large {
+    .loading-spinner-large,
+    .nfc-waves .wave,
+    #nfcSupport,
+    #nfcActive,
+    .result-card::before {
         animation: none;
+    }
+    
+    .card:hover {
+        transform: none;
     }
 }
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
     .paw-pattern {
-        background: #1f2937;
+        background: linear-gradient(135deg, #1f2937, #374151);
         color: #f9fafb;
     }
+    
+    .card {
+        background: rgba(55, 65, 81, 0.9);
+        border-color: #4b5563;
+        color: #f9fafb;
+    }
+    
+    #rfidInput {
+        background: #374151;
+        border-color: #4b5563;
+        color: #f9fafb;
+    }
+    
+    #rfidInput:focus {
+        background: #1f2937;
+        border-color: #3b82f6;
+    }
+}
+
+/* Indicadores de estado adicionales */
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.status-active {
+    background: #10b981;
+    animation: pulse-green 2s infinite;
+}
+
+.status-inactive {
+    background: #6b7280;
+}
+
+.status-error {
+    background: #ef4444;
+    animation: pulse-red 1s infinite;
+}
+
+@keyframes pulse-green {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+@keyframes pulse-red {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
 }
 </style>
 
 <?php 
-$additionalScripts = ['/assets/js/rfid-scanner.js'];
+$additionalScripts = ['/patitasalmar-php/assets/js/rfid-scanner.js'];
 include '../includes/footer.php'; 
 ?>

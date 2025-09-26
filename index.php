@@ -1,15 +1,39 @@
- <head>
-  <meta charset="UTF-8">
-  <title>PatitasAlMar</title>
-  <link rel="stylesheet" href="assets/css/style.css">
-</head>
+<?php
+// Verificar si el usuario ya está logueado
+session_start();
+if (isset($_SESSION['user'])) {
+    header('Location: /patitasalmar-php/dashboard');
+    exit();
+}
 
- <div class="app-container">
+$pageTitle = "Inicio";
+$hideHeader = true;
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PatitasAlMar - Sistema de Identificación de Mascotas</title>
+    <link rel="stylesheet" href="/patitasalmar-php/assets/css/style.css">
+    <meta name="description" content="Sistema inteligente de identificación de mascotas con tecnología RFID - Las Grutas, Río Negro">
+    <meta name="keywords" content="mascotas, RFID, identificación, Las Grutas, Río Negro, perros, gatos">
+    
+    <!-- Open Graph para redes sociales -->
+    <meta property="og:title" content="PatitasAlMar - Sistema de Identificación de Mascotas">
+    <meta property="og:description" content="Sistema inteligente de identificación y gestión de mascotas con tecnología RFID - Las Grutas, Río Negro">
+    <meta property="og:type" content="website">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐾</text></svg>">
+</head>
+<body>
+    <div class="app-container">
         <!-- HEADER -->
         <header class="header">
             <div class="container">
                 <div class="header-content">
-                    <a href="#" class="logo">
+                    <a href="/patitasalmar-php/" class="logo">
                         <div class="logo-icon">🐾</div>
                         <div class="logo-text">
                             <h1>PatitasAlMar</h1>
@@ -18,14 +42,14 @@
                     </a>
                     
                     <nav class="nav">
-                        <a href="#" class="nav-link active">Inicio</a>
-                        <a href="#" class="nav-link">Escáner</a>
-                        <a href="#" class="nav-link">Registrar</a>
-                        <a href="#" class="nav-link">Dashboard</a>
+                        <a href="/patitasalmar-php/" class="nav-link active">Inicio</a>
+                        <a href="/patitasalmar-php/rfid-scanner" class="nav-link">Escáner</a>
+                        <a href="/patitasalmar-php/register" class="nav-link">Registrar</a>
+                        <a href="/patitasalmar-php/login" class="nav-link">Dashboard</a>
                     </nav>
                     
                     <div class="flex items-center gap-4">
-                        <a href="#" class="btn btn-ghost">Iniciar Sesión</a>
+                        <a href="/patitasalmar-php/login" class="btn btn-ghost">Iniciar Sesión</a>
                     </div>
                 </div>
             </div>
@@ -41,8 +65,8 @@
                     <p class="subtitle">Las Grutas, Río Negro</p>
                     
                     <div class="flex justify-center gap-4 mb-6">
-                        <a href="#scanner" class="btn btn-primary">🔍 Escanear RFID</a>
-                        <a href="#" class="btn btn-secondary">📝 Registrar Mascota</a>
+                        <a href="/patitasalmar-php/rfid-scanner" class="btn btn-primary">🔍 Escanear RFID</a>
+                        <a href="/patitasalmar-php/register" class="btn btn-secondary">📝 Registrar Mascota</a>
                     </div>
                     
                     <p style="opacity: 0.8; font-size: 0.9rem;">
@@ -140,47 +164,30 @@
                         </div>
                     </div>
                     
-                    <!-- LOADING STATE -->
+                    <!-- Estados de carga y resultados -->
                     <div id="loadingState" class="result-card result-loading hidden">
                         <div class="spinner"></div>
-                        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">
-                            Buscando mascota...
-                        </h3>
+                        <h3>Buscando mascota...</h3>
                         <p>Consultando la base de datos</p>
                     </div>
                     
-                    <!-- ERROR STATE -->
                     <div id="errorState" class="result-card result-error hidden">
                         <div style="font-size: 3rem; margin-bottom: 1rem;">❌</div>
-                        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">
-                            Mascota no encontrada
-                        </h3>
-                        <p style="margin-bottom: 1.5rem;">
-                            Verifica que el tag RFID esté registrado en el sistema
-                        </p>
-                        <div style="font-size: 0.875rem; opacity: 0.9;">
-                            <p>• Asegúrate de escribir correctamente el código</p>
-                            <p>• El tag debe estar registrado en PatitasAlMar</p>
-                            <p>• Contacta al dueño si conoces otra forma</p>
-                        </div>
+                        <h3>Mascota no encontrada</h3>
+                        <p>Verifica que el tag RFID esté registrado en el sistema</p>
                     </div>
                     
-                    <!-- SUCCESS STATE - PET FOUND -->
                     <div id="successState" class="hidden">
                         <div class="result-card result-success">
                             <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
-                            <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">
-                                ¡Mascota encontrada!
-                            </h3>
+                            <h3>¡Mascota encontrada!</h3>
                             <p>Información de contacto disponible</p>
                         </div>
                         
-                        <!-- PET PROFILE -->
+                        <!-- Perfil de la mascota -->
                         <div class="pet-profile">
                             <div class="pet-header">
-                                <div class="pet-avatar" id="petAvatar">
-                                    🐕
-                                </div>
+                                <div class="pet-avatar" id="petAvatar">🐕</div>
                                 <h2 class="pet-name" id="petName">Luna</h2>
                                 <p class="pet-species" id="petSpecies">🐕 Perro Golden Retriever</p>
                             </div>
@@ -191,12 +198,10 @@
                                         <div class="pet-info-label">Edad</div>
                                         <div class="pet-info-value" id="petAge">3 años</div>
                                     </div>
-                                    
                                     <div class="pet-info-item">
                                         <div class="pet-info-label">RFID</div>
-                                        <div class="pet-info-value" id="petRfid" style="font-family: var(--font-mono);">LUNA001</div>
+                                        <div class="pet-info-value" id="petRfid">LUNA001</div>
                                     </div>
-                                    
                                     <div class="pet-info-item">
                                         <div class="pet-info-label">Registrado</div>
                                         <div class="pet-info-value" id="petRegistered">15 Ene 2025</div>
@@ -206,66 +211,24 @@
                                 <div class="pet-info-item" style="margin-bottom: 2rem;">
                                     <div class="pet-info-label">Descripción</div>
                                     <div class="pet-info-value" id="petDescription">
-                                        Perra muy cariñosa, le gusta jugar en la playa. Responde a su nombre y es muy sociable con otros perros.
+                                        Perra muy cariñosa, le gusta jugar en la playa.
                                     </div>
                                 </div>
                                 
-                                <!-- OWNER CONTACT -->
                                 <div class="owner-contact">
-                                    <div class="contact-title">
-                                        📞 Contacta al dueño
-                                    </div>
+                                    <div class="contact-title">📞 Contacta al dueño</div>
                                     
                                     <div id="ownerInfo">
-                                        <div style="margin-bottom: 1rem;">
-                                            <div class="pet-info-label">Nombre</div>
-                                            <div class="pet-info-value" id="ownerName">María González</div>
-                                        </div>
-                                        
-                                        <div style="margin-bottom: 1rem;">
-                                            <div class="pet-info-label">Email</div>
-                                            <div class="pet-info-value">
-                                                <a href="mailto:maria@ejemplo.com" 
-                                                   id="ownerEmail"
-                                                   style="color: var(--primary); text-decoration: none;">
-                                                    maria@ejemplo.com
-                                                </a>
-                                            </div>
-                                        </div>
-                                        
-                                        <div style="margin-bottom: 1rem;">
-                                            <div class="pet-info-label">Teléfono</div>
-                                            <div class="pet-info-value">
-                                                <a href="tel:+542920123456" 
-                                                   id="ownerPhone"
-                                                   style="color: var(--primary); text-decoration: none;">
-                                                    +54 2920 123456
-                                                </a>
-                                            </div>
-                                        </div>
+                                        <p><strong>Nombre:</strong> <span id="ownerName">María González</span></p>
+                                        <p><strong>Email:</strong> <a href="mailto:" id="ownerEmail">maria@ejemplo.com</a></p>
+                                        <p><strong>Teléfono:</strong> <a href="tel:" id="ownerPhone">+54 2920 123456</a></p>
                                     </div>
                                     
                                     <div class="contact-actions">
-                                        <button class="btn btn-primary" id="callBtn">
-                                            📞 Llamar
-                                        </button>
-                                        <button class="btn btn-secondary" id="emailBtn" style="background: var(--success); color: white;">
-                                            ✉️ Email
-                                        </button>
-                                        <button class="btn btn-ghost" id="shareBtn">
-                                            📤 Compartir
-                                        </button>
+                                        <button class="btn btn-primary" id="callBtn">📞 Llamar</button>
+                                        <button class="btn btn-secondary" id="emailBtn">✉️ Email</button>
+                                        <button class="btn btn-ghost" id="shareBtn">📤 Compartir</button>
                                     </div>
-                                </div>
-                                
-                                <!-- THANK YOU MESSAGE -->
-                                <div style="background: var(--gradient-soft); border-radius: 16px; padding: 1.5rem; margin-top: 2rem; border: 2px solid var(--success);">
-                                    <h4 style="color: var(--success); font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                                        🎉 ¡Gracias por ayudar!
-                                    </h4>
-                                    <p style="color: var(--gray-700); font-size: 0.9rem;">
-                                        Tu búsqueda ha sido registrada. Si encontraste a esta mascota, por favor contacta al dueño lo antes posible.
-                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -274,7 +237,7 @@
             </div>
         </section>
 
-        <!-- HOW TO USE -->
+        <!-- INSTRUCCIONES -->
         <section class="py-16" style="background: white;">
             <div class="container">
                 <div class="text-center mb-8">
@@ -310,6 +273,12 @@
                         </ul>
                     </div>
                 </div>
+
+                <div class="text-center mt-8">
+                    <a href="/patitasalmar-php/rfid-scanner" class="btn btn-primary">
+                        🔍 Ir al Escáner Completo
+                    </a>
+                </div>
             </div>
         </section>
 
@@ -333,11 +302,10 @@
                     </p>
                     
                     <div class="flex justify-center gap-6 mb-8">
-                        <a href="#" style="color: var(--gray-400); text-decoration: none; hover: color: white;">Inicio</a>
-                        <a href="#" style="color: var(--gray-400); text-decoration: none;">Registrar Mascota</a>
-                        <a href="#" style="color: var(--gray-400); text-decoration: none;">Escáner RFID</a>
-                        <a href="#" style="color: var(--gray-400); text-decoration: none;">Dashboard</a>
-                        <a href="#" style="color: var(--gray-400); text-decoration: none;">Ayuda</a>
+                        <a href="/patitasalmar-php/" style="color: var(--gray-400); text-decoration: none;">Inicio</a>
+                        <a href="/patitasalmar-php/register" style="color: var(--gray-400); text-decoration: none;">Registrar Mascota</a>
+                        <a href="/patitasalmar-php/rfid-scanner" style="color: var(--gray-400); text-decoration: none;">Escáner RFID</a>
+                        <a href="/patitasalmar-php/login" style="color: var(--gray-400); text-decoration: none;">Iniciar Sesión</a>
                     </div>
                     
                     <div style="border-top: 1px solid var(--gray-700); padding-top: 2rem;">
@@ -352,3 +320,112 @@
             </div>
         </footer>
     </div>
+
+    <script src="/patitasalmar-php/assets/js/main.js"></script>
+    <script>
+        // JavaScript para el escáner básico en la homepage
+        document.addEventListener('DOMContentLoaded', function() {
+            const rfidInput = document.getElementById('rfidInput');
+            const scanBtn = document.getElementById('scanBtn');
+            
+            if (scanBtn) {
+                scanBtn.addEventListener('click', handleHomeScan);
+            }
+            
+            if (rfidInput) {
+                rfidInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        handleHomeScan();
+                    }
+                });
+                
+                // Auto-mayúsculas y solo alfanuméricos
+                rfidInput.addEventListener('input', function() {
+                    this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                });
+            }
+        });
+        
+        async function handleHomeScan() {
+            const rfidInput = document.getElementById('rfidInput');
+            const scanBtn = document.getElementById('scanBtn');
+            const value = rfidInput.value.trim();
+            
+            if (!value) {
+                alert('Por favor ingresa un código RFID');
+                rfidInput.focus();
+                return;
+            }
+            
+            if (value.length < 3) {
+                alert('El código RFID debe tener al menos 3 caracteres');
+                rfidInput.focus();
+                return;
+            }
+            
+            // Mostrar loading básico
+            const originalText = scanBtn.innerHTML;
+            scanBtn.disabled = true;
+            scanBtn.innerHTML = '<span style="display: inline-block; width: 12px; height: 12px; border: 2px solid #ffffff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></span> Buscando...';
+            
+            try {
+                // Realizar búsqueda real
+                const response = await fetch('/patitasalmar-php/api/rfid/scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ rfidTag: value })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Redirigir al escáner completo con resultado
+                    window.location.href = `/patitasalmar-php/rfid-scanner?rfid=${encodeURIComponent(value)}&found=1`;
+                } else {
+                    // Redirigir al escáner con mensaje de error
+                    window.location.href = `/patitasalmar-php/rfid-scanner?rfid=${encodeURIComponent(value)}&error=1`;
+                }
+            } catch (error) {
+                // Error de conexión - redirigir al escáner completo
+                console.error('Error:', error);
+                window.location.href = `/patitasalmar-php/rfid-scanner?rfid=${encodeURIComponent(value)}`;
+            } finally {
+                scanBtn.disabled = false;
+                scanBtn.innerHTML = originalText;
+            }
+        }
+        
+        // Animación de spin para el loading
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Funcionalidad adicional
+        window.addEventListener('load', function() {
+            // Auto-focus en el campo RFID cuando se scrollea a la sección
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const rfidInput = document.getElementById('rfidInput');
+                        if (rfidInput && window.innerWidth > 768) {
+                            setTimeout(() => rfidInput.focus(), 500);
+                        }
+                    }
+                });
+            });
+            
+            const scannerSection = document.getElementById('scanner');
+            if (scannerSection) {
+                observer.observe(scannerSection);
+            }
+        });
+    </script>
+</body>
+</html>
