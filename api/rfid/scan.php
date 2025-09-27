@@ -1,75 +1,143 @@
 <?php
-header('Content-Type: application/json');
-require_once '../../config/database.php';
-require_once '../../includes/functions.php';
+/**
+ * API para escaneo RFID - Versión simplificada
+ * Ruta: /patitasalmar-php/api/rfid/scan.php
+ */
 
+// Headers necesarios
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// Manejar preflight OPTIONS
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+// Solo permitir POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Método no permitido']);
     exit();
 }
 
-$input = json_decode(file_get_contents('php://input'), true);
-$rfidTag = sanitizeInput($input['rfidTag'] ?? '');
-
-if (empty($rfidTag)) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Tag RFID requerido']);
+// Función para responder con JSON
+function jsonResponse($success, $message, $data = null) {
+    $response = ['success' => $success, 'message' => $message];
+    if ($data) {
+        $response = array_merge($response, $data);
+    }
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
     exit();
 }
 
+// Obtener datos del POST
+$input = file_get_contents('php://input');
+$data = json_decode($input, true);
+
+// Si no hay JSON, intentar POST normal
+if (!$data) {
+    $data = $_POST;
+}
+
+$rfidTag = isset($data['rfidTag']) ? trim(strtoupper($data['rfidTag'])) : '';
+
+// Validar input
+if (empty($rfidTag)) {
+    jsonResponse(false, 'Tag RFID requerido');
+}
+
+if (!preg_match('/^[A-Z0-9]{3,20}$/', $rfidTag)) {
+    jsonResponse(false, 'Tag RFID debe tener entre 3 y 20 caracteres alfanuméricos');
+}
+
+// Log del intento
+error_log("RFID API: Buscando tag '$rfidTag'");
+
 try {
-    $database = new Database();
-    $db = $database->getConnection();
+    // Configuración de base de datos directa
+    $host = 'localhost';
+    $port = '3307';  // Tu puerto XAMPP
+    $database = 'patitasalmar_db';
+    $username = 'root';
+    $password = '';
     
-    $query = "SELECT p.*, u.name as owner_name, u.email as owner_email, u.phone as owner_phone
-              FROM pets p
-              LEFT JOIN users u ON p.owner_id = u.id
-              WHERE p.rfid_tag = :rfid_tag";
+    // Conectar
+    $dsn = "mysql:host=$host;port=$port;dbname=$database;charset=utf8mb4";
+    $pdo = new PDO($dsn, $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(':rfid_tag', $rfidTag);
+    // Buscar mascota
+    $sql = "SELECT p.*, u.name as owner_name, u.email as owner_email, u.phone as owner_phone
+            FROM pets p
+            LEFT JOIN users u ON p.owner_id = u.id
+            WHERE p.rfid_tag = :tag";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':tag', $rfidTag);
     $stmt->execute();
     
     $pet = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$pet) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Mascota no encontrada'
-        ]);
-        exit();
+        error_log("RFID API: Tag '$rfidTag' no encontrado");
+        jsonResponse(false, 'Mascota no encontrada');
     }
     
-    // Registrar el escaneo
-    $clientIP = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    // Registrar escaneo
+    try {
+        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+        
+        $scanSql = "INSERT INTO scans (pet_id, scanned_at, ip_address, user_agent) VALUES (?, NOW(), ?, ?)";
+        $scanStmt = $pdo->prepare($scanSql);
+        $scanStmt->execute([$pet['id'], $ip, $userAgent]);
+    } catch (Exception $e) {
+        error_log("Error registrando escaneo: " . $e->getMessage());
+    }
     
-    $scanQuery = "INSERT INTO scans (pet_id, scanned_at, ip_address) VALUES (:pet_id, NOW(), :ip_address)";
-    $scanStmt = $db->prepare($scanQuery);
-    $scanStmt->bindParam(':pet_id', $pet['id']);
-    $scanStmt->bindParam(':ip_address', $clientIP);
-    $scanStmt->execute();
+    // Emoji por especie
+    $emojis = [
+        'Perro' => '🐕',
+        'Gato' => '🐱',
+        'Ave' => '🐦',
+        'Conejo' => '🐰',
+        'Pez' => '🐟',
+        'Reptil' => '🦎',
+        'Hamster' => '🐹'
+    ];
+    $emoji = $emojis[$pet['species']] ?? '🐾';
     
-    echo json_encode([
-        'success' => true,
+    // Respuesta exitosa
+    error_log("RFID API: Mascota encontrada: {$pet['name']} ({$rfidTag})");
+    
+    jsonResponse(true, 'Mascota encontrada', [
         'pet' => [
             'id' => $pet['id'],
             'name' => $pet['name'],
             'species' => $pet['species'],
+            'species_emoji' => $emoji,
             'breed' => $pet['breed'],
+            'age' => $pet['age'] ? (int)$pet['age'] : null,
+            'rfid_tag' => $pet['rfid_tag'],
             'description' => $pet['description'],
-            'imageUrl' => $pet['image_url'],
-            'owner' => [
+            'image_url' => $pet['image_url'],
+            'registered_date' => $pet['created_at'],
+            'owner' => $pet['owner_name'] ? [
                 'name' => $pet['owner_name'],
                 'email' => $pet['owner_email'],
                 'phone' => $pet['owner_phone']
-            ]
+            ] : null
         ]
     ]);
     
 } catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Error del servidor']);
+    error_log("RFID API: Error BD: " . $e->getMessage());
+    jsonResponse(false, 'Error de conexión a la base de datos: ' . $e->getMessage());
+} catch (Exception $e) {
+    error_log("RFID API: Error general: " . $e->getMessage());
+    jsonResponse(false, 'Error del servidor: ' . $e->getMessage());
 }
 ?>
-                    

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Refactorización - PatitasAlMar</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test de Refactorización - PatitasAlMar</h1>
+    
+    <div class="test-section">
+        <h2>1. Test de Utilidades Centralizadas</h2>
+        <button onclick="testUtils()">Probar Utilidades</button>
+        <div id="utils-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Test de Notificaciones</h2>
+        <button onclick="testNotifications()">Probar Notificaciones</button>
+        <div id="notification-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Test de Validación de Email</h2>
+        <input type="email" id="email-test" placeholder="test@ejemplo.com">
+        <button onclick="testEmailValidation()">Validar Email</button>
+        <div id="email-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Test de Emojis de Especies</h2>
+        <button onclick="testSpeciesEmojis()">Probar Emojis</button>
+        <div id="species-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. Test de NFC Scanner</h2>
+        <button onclick="testNFCScanner()">Probar NFC Scanner</button>
+        <div id="nfc-result"></div>
+    </div>
+
+    <!-- Cargar utilidades -->
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/nfc-scanner.js"></script>
+    <script src="assets/js/rfid-scanner.js"></script>
+    <script src="assets/js/main.js"></script>
+    
+    <script>
+        function testUtils() {
+            const result = document.getElementById('utils-result');
+            try {
+                // Test de funciones básicas
+                const emoji = getSpeciesEmoji('perro');
+                const isValidEmail = validateEmail('test@ejemplo.com');
+                const sanitized = sanitizeInput('test123@ejemplo.com');
+                
+                result.innerHTML = `
+                    <div class="success">
+                        ✅ Utilidades cargadas correctamente<br>
+                        - getSpeciesEmoji('perro'): ${emoji}<br>
+                        - validateEmail('test@ejemplo.com'): ${isValidEmail}<br>
+                        - sanitizeInput('test123@ejemplo.com'): ${sanitized}
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        function testNotifications() {
+            const result = document.getElementById('notification-result');
+            try {
+                if (window.NotificationManager) {
+                    window.NotificationManager.showSuccess('Test de notificación exitosa!');
+                    window.NotificationManager.showError('Test de notificación de error!');
+                    window.NotificationManager.showInfo('Test de notificación informativa!');
+                    window.NotificationManager.showWarning('Test de notificación de advertencia!');
+                    
+                    result.innerHTML = '<div class="success">✅ Notificaciones mostradas correctamente</div>';
+                } else {
+                    result.innerHTML = '<div class="error">❌ NotificationManager no está disponible</div>';
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        function testEmailValidation() {
+            const email = document.getElementById('email-test').value;
+            const result = document.getElementById('email-result');
+            
+            if (!email) {
+                result.innerHTML = '<div class="error">❌ Por favor ingresa un email</div>';
+                return;
+            }
+            
+            const isValid = validateEmail(email);
+            result.innerHTML = `
+                <div class="${isValid ? 'success' : 'error'}">
+                    ${isValid ? '✅' : '❌'} Email "${email}" es ${isValid ? 'válido' : 'inválido'}
+                </div>
+            `;
+        }
+        
+        function testSpeciesEmojis() {
+            const result = document.getElementById('species-result');
+            const species = ['perro', 'gato', 'ave', 'conejo', 'pez', 'reptil', 'hamster', 'otro', 'desconocido'];
+            
+            let html = '<div class="success">✅ Emojis de especies:<br>';
+            species.forEach(specie => {
+                const emoji = getSpeciesEmoji(specie);
+                html += `${specie}: ${emoji} `;
+            });
+            html += '</div>';
+            
+            result.innerHTML = html;
+        }
+        
+        function testNFCScanner() {
+            const result = document.getElementById('nfc-result');
+            try {
+                if (window.NFCScanner) {
+                    const scanner = new NFCScanner({
+                        onSuccess: (code) => {
+                            result.innerHTML = `<div class="success">✅ NFC Scanner creado correctamente. Código recibido: ${code}</div>`;
+                        },
+                        onError: (error) => {
+                            result.innerHTML = `<div class="error">❌ Error NFC: ${error}</div>`;
+                        },
+                        onStatusChange: (status) => {
+                            console.log('NFC Status:', status);
+                        }
+                    });
+                    
+                    const isSupported = scanner.isNFCSupported();
+                    const deviceInfo = scanner.getDeviceInfo();
+                    const recommendations = scanner.getRecommendations();
+                    
+                    result.innerHTML = `
+                        <div class="success">
+                            ✅ NFC Scanner creado correctamente<br>
+                            - Soporte NFC: ${isSupported ? 'Sí' : 'No'}<br>
+                            - Dispositivo: ${deviceInfo.isIOS ? 'iOS' : deviceInfo.isAndroid ? 'Android' : 'Otro'}<br>
+                            - Recomendación: ${recommendations.primary}
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = '<div class="error">❌ NFCScanner no está disponible</div>';
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Test automático al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 Iniciando tests de refactorización...');
+            
+            // Verificar que todas las utilidades estén disponibles
+            const utils = [
+                'getSpeciesEmoji', 'validateEmail', 'sanitizeInput', 
+                'showError', 'showSuccess', 'apiRequest'
+            ];
+            
+            const missing = utils.filter(util => typeof window[util] !== 'function');
+            
+            if (missing.length === 0) {
+                console.log('✅ Todas las utilidades están disponibles');
+            } else {
+                console.error('❌ Utilidades faltantes:', missing);
+            }
+            
+            // Verificar NotificationManager
+            if (window.NotificationManager) {
+                console.log('✅ NotificationManager disponible');
+            } else {
+                console.error('❌ NotificationManager no disponible');
+            }
+            
+            // Verificar clases de escaneo
+            if (window.NFCScanner) {
+                console.log('✅ NFCScanner disponible');
+            } else {
+                console.error('❌ NFCScanner no disponible');
+            }
+        });
+    </script>
+</body>
+</html>

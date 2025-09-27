@@ -1,2 +1,120 @@
-/config
-/sql
+# ============================================
+# PatitasAlMar - Archivos a excluir del repositorio
+# ============================================
+
+# Archivos de configuración con credenciales
+config/config.local.php
+config/database.local.php
+config/secrets.php
+
+# Variables de entorno
+.env
+.env.local
+.env.production
+.env.staging
+
+# Archivos de setup/instalación (contienen credenciales)
+setup_database.php
+install.php
+config_setup.php
+
+# Archivos de prueba con datos sensibles
+test_connection.php
+check_rfid_codes.php
+simple_check_rfids.php
+debug.php
+
+# Logs
+logs/
+*.log
+error.log
+access.log
+
+# Archivos temporales
+tmp/
+temp/
+cache/
+
+# Uploads de usuarios (pueden contener datos personales)
+uploads/
+files/
+images/pets/
+
+# Backups de base de datos
+*.sql
+*.dump
+backups/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Dependencias (si usas Composer)
+vendor/
+node_modules/
+
+# Archivos de configuración del servidor
+.htaccess.local
+nginx.conf
+apache.conf
+
+# Certificados SSL
+*.pem
+*.key
+*.crt
+*.csr
+
+# Archivos de sesión
+sessions/
+php_sessions/
+
+# Archivos de caché
+cache/
+*.cache
+
+# Archivos de desarrollo
+dev/
+development/
+testing/
+
+# Documentación con información sensible
+INSTALL.md
+SETUP.md
+DEPLOY.md
+
+# ============================================
+# Patrones específicos del proyecto
+# ============================================
+
+# Scripts de administración
+admin_tools/
+migration_scripts/
+data_import/
+
+# Archivos de configuración específicos de Hostinger
+hostinger_config.php
+cpanel_config.php
+
+# Archivos de monitoreo
+monitoring/
+stats/
+analytics/
+
+# ============================================
+# IMPORTANTE: Archivos que SÍ se deben subir
+# ============================================
+# Los siguientes archivos SÍ deben estar en el repo:
+# - config/database.php (versión segura sin credenciales)
+# - config/config.example.php (plantilla de configuración)
+# - README.md
+# - src/ (código fuente)
+# - assets/ (archivos estáticos)
+# - api/ (APIs sin credenciales hardcodeadas)
