@@ -822,6 +822,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </style>
 
 <?php 
-$additionalScripts = ['/assets/js/nfc-scanner.js', '/assets/js/nfc-fallback.js', '/assets/js/pets.js'];
+$additionalScripts = ['/assets/js/utils.js', '/assets/js/nfc-scanner.js', '/assets/js/nfc-fallback.js', '/assets/js/pets.js'];
 include '../../includes/footer.php'; 
 ?>

@@ -18,6 +18,7 @@
         <?php endforeach; ?>
     <?php endif; ?>
     
+    <script src="/assets/js/utils.js"></script>
     <script src="/assets/js/main.js"></script>
 </body>
 </html>

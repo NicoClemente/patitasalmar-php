@@ -198,5 +198,6 @@ include '../includes/header.php';
 }
 </style>
 
+<script src="/patitasalmar-php/assets/js/utils.js"></script>
 <script src="/patitasalmar-php/assets/js/auth.js"></script>
 <?php include '../includes/footer.php'; ?>

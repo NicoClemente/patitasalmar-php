@@ -219,46 +219,7 @@ class NFCScanner {
     }
 }
 
-/**
- * Utilidades para mostrar notificaciones
- */
-class NotificationManager {
-    static showSuccess(message, duration = 3000) {
-        this.showNotification(message, 'success', duration);
-    }
-
-    static showError(message, duration = 4000) {
-        this.showNotification(message, 'error', duration);
-    }
-
-    static showInfo(message, duration = 3000) {
-        this.showNotification(message, 'info', duration);
-    }
-
-    static showNotification(message, type = 'info', duration = 3000) {
-        const notification = document.createElement('div');
-        notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 animate-slide-in ${
-            type === 'success' ? 'bg-green-500 text-white' : 
-            type === 'error' ? 'bg-red-500 text-white' : 
-            'bg-blue-500 text-white'
-        }`;
-        
-        notification.innerHTML = `
-            <div class="flex items-center gap-2">
-                <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
-                <span>${message}</span>
-            </div>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
-            }
-        }, duration);
-    }
-}
+// NotificationManager ahora está en utils.js
 
 /**
  * Funciones de utilidad para formularios
@@ -302,12 +263,12 @@ class FormNFCIntegration {
     handleNFCSuccess(code) {
         this.input.value = code;
         this.options.onScanSuccess(code);
-        NotificationManager.showSuccess(`📡 Tag NFC leído: ${code}`);
+        window.NotificationManager.showSuccess(`📡 Tag NFC leído: ${code}`);
     }
 
     handleNFCError(error) {
         this.options.onScanError(error);
-        NotificationManager.showError(error);
+        window.NotificationManager.showError(error);
     }
 
     handleNFCStatus(status) {
@@ -329,5 +290,4 @@ class FormNFCIntegration {
 
 // Exportar para uso global
 window.NFCScanner = NFCScanner;
-window.NotificationManager = NotificationManager;
 window.FormNFCIntegration = FormNFCIntegration;

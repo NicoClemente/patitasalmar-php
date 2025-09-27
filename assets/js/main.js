@@ -73,136 +73,13 @@ function initializeForms() {
     });
 }
 
-// ============================================
-// SISTEMA DE NOTIFICACIONES MEJORADO
-// ============================================
-
-function initializeNotifications() {
-    // Crear contenedor de notificaciones si no existe
-    if (!document.getElementById('notifications-container')) {
-        const container = document.createElement('div');
-        container.id = 'notifications-container';
-        container.className = 'fixed top-4 right-4 z-50 space-y-2';
-        container.style.zIndex = '1000';
-        document.body.appendChild(container);
-    }
-}
-
-function showNotification(message, type = 'info', duration = 4000) {
-    const container = document.getElementById('notifications-container');
-    if (!container) {
-        // Fallback a alert si no hay contenedor
-        alert(message);
-        return;
-    }
-    
-    const notification = document.createElement('div');
-    const id = 'notification-' + Date.now();
-    notification.id = id;
-    
-    const bgColors = {
-        success: 'bg-green-500',
-        error: 'bg-red-500',
-        warning: 'bg-yellow-500',
-        info: 'bg-blue-500'
-    };
-    
-    const icons = {
-        success: '✅',
-        error: '❌',
-        warning: '⚠️',
-        info: 'ℹ️'
-    };
-    
-    notification.className = `${bgColors[type] || bgColors.info} text-white p-3 rounded-lg shadow-lg max-w-sm animate-slide-in`;
-    notification.style.animation = 'slideInFromRight 0.3s ease-out';
-    notification.innerHTML = `
-        <div style="display: flex; align-items: start; gap: 0.75rem;">
-            <span style="flex-shrink: 0; font-size: 1.125rem;">${icons[type] || icons.info}</span>
-            <div style="flex: 1;">
-                <p style="font-size: 0.875rem; font-weight: 500; margin: 0;">${escapeHtml(message)}</p>
-            </div>
-            <button onclick="removeNotification('${id}')" style="flex-shrink: 0; background: none; border: none; color: white; cursor: pointer; padding: 0; font-size: 1.125rem;" title="Cerrar">
-                ×
-            </button>
-        </div>
-    `;
-    
-    container.appendChild(notification);
-    
-    // Auto-remove después del tiempo especificado
-    if (duration > 0) {
-        setTimeout(() => {
-            removeNotification(id);
-        }, duration);
-    }
-}
-
-function removeNotification(id) {
-    const notification = document.getElementById(id);
-    if (notification) {
-        notification.style.transform = 'translateX(100%)';
-        notification.style.opacity = '0';
-        notification.style.transition = 'all 0.3s ease';
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
-            }
-        }, 300);
-    }
-}
+// Sistema de notificaciones ahora está en utils.js
 
 // ============================================
 // TUS FUNCIONES ORIGINALES (MEJORADAS)
 // ============================================
 
-function validateEmail(e) {
-    const email = e.target.value;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
-    if (email && !emailRegex.test(email)) {
-        e.target.style.borderColor = '#dc2626';
-        showFieldError(e.target, 'Por favor ingresa un email válido');
-        return false;
-    } else {
-        e.target.style.borderColor = '#d1d5db';
-        hideFieldError(e.target);
-        return true;
-    }
-}
-
-function validatePasswordMatch(e) {
-    const password = document.getElementById('password');
-    const confirmPassword = e.target;
-    
-    if (password && confirmPassword.value !== password.value) {
-        confirmPassword.style.borderColor = '#dc2626';
-        showFieldError(confirmPassword, 'Las contraseñas no coinciden');
-        return false;
-    } else {
-        confirmPassword.style.borderColor = '#d1d5db';
-        hideFieldError(confirmPassword);
-        return true;
-    }
-}
-
-function showFieldError(field, message) {
-    // Remover error anterior si existe
-    hideFieldError(field);
-    
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'field-error text-red-600 text-sm mt-1';
-    errorDiv.textContent = message;
-    
-    field.parentNode.insertBefore(errorDiv, field.nextSibling);
-}
-
-function hideFieldError(field) {
-    const existingError = field.parentNode.querySelector('.field-error');
-    if (existingError) {
-        existingError.remove();
-    }
-}
+// Funciones de validación ahora están en utils.js
 
 function hideMessages() {
     const messages = document.querySelectorAll('.alert, .success-message, .error-message');
@@ -390,19 +267,7 @@ function handleImageUpload(input, previewContainer, options = {}) {
 // FUNCIONES ADICIONALES ÚTILES
 // ============================================
 
-function getSpeciesEmoji(species) {
-    const emojis = {
-        'perro': '🐕',
-        'gato': '🐱',
-        'ave': '🐦',
-        'conejo': '🐰',
-        'pez': '🐟',
-        'reptil': '🦎',
-        'hamster': '🐹',
-        'otro': '🐾'
-    };
-    return emojis[species.toLowerCase()] || '🐾';
-}
+// getSpeciesEmoji ahora está en utils.js
 
 // Función para copiar al portapapeles
 async function copyToClipboard(text) {
@@ -458,22 +323,11 @@ window.PatitasAlMar = {
     // API
     apiRequest,
     
-    // UI
-    showNotification,
-    removeNotification,
-    
-    // Validación
-    validateEmail,
-    validatePasswordMatch,
-    showFieldError,
-    hideFieldError,
-    
     // Utilidades
     formatDate,
     formatTime,
     sanitizeHtml,
     escapeHtml,
-    getSpeciesEmoji,
     copyToClipboard,
     
     // Estadísticas
@@ -751,16 +605,7 @@ class PatitasScanner {
 
             // Utility methods
             getSpeciesEmoji(species) {
-                const emojis = {
-                    'perro': '🐕',
-                    'gato': '🐱',
-                    'ave': '🐦',
-                    'conejo': '🐰',
-                    'pez': '🐟',
-                    'reptil': '🦎',
-                    'hamster': '🐹'
-                };
-                return emojis[species.toLowerCase()] || '🐾';
+                return window.getSpeciesEmoji ? window.getSpeciesEmoji(species) : '🐾';
             }
 
             formatDate(dateString) {
@@ -786,34 +631,11 @@ class PatitasScanner {
             }
 
             showNotification(message, type = 'info') {
-                const notification = document.createElement('div');
-                notification.className = `fixed top-4 right-4 p-4 rounded-2xl shadow-2xl z-50 max-w-sm`;
-                notification.style.animation = 'slideIn 0.3s ease';
-                
-                const colors = {
-                    success: 'background: var(--gradient-primary); color: white;',
-                    error: 'background: var(--error); color: white;',
-                    info: 'background: var(--info); color: white;'
-                };
-                
-                notification.style.cssText = colors[type] || colors.info;
-                notification.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                        <span style="font-size: 1.25rem;">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
-                        <span style="font-weight: 600;">${message}</span>
-                        <button onclick="this.parentElement.parentElement.remove()" 
-                                style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1.25rem; margin-left: auto;">×</button>
-                    </div>
-                `;
-                
-                document.body.appendChild(notification);
-                
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.style.animation = 'slideOut 0.3s ease forwards';
-                        setTimeout(() => notification.remove(), 300);
-                    }
-                }, 4000);
+                if (window.NotificationManager) {
+                    window.NotificationManager.showNotification(message, type);
+                } else {
+                    alert(message);
+                }
             }
 
             trackAction(action, data = null) {

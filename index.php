@@ -276,6 +276,7 @@ include 'includes/header.php';
         </footer>
     </div>
 
+    <script src="/patitasalmar-php/assets/js/utils.js"></script>
     <script src="/patitasalmar-php/assets/js/main.js"></script>
     <script>
         // JavaScript para el escáner básico en la homepage

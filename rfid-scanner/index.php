@@ -1268,6 +1268,6 @@ a.text-blue-600:hover {
 </style>
 
 <?php 
-$additionalScripts = ['/patitasalmar-php/assets/js/nfc-scanner.js', '/patitasalmar-php/assets/js/rfid-scanner.js'];
+$additionalScripts = ['/patitasalmar-php/assets/js/utils.js', '/patitasalmar-php/assets/js/nfc-scanner.js', '/patitasalmar-php/assets/js/rfid-scanner.js'];
 include '../includes/footer.php'; 
 ?>

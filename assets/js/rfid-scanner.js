@@ -140,8 +140,17 @@ function showError(message) {
     const errorDiv = document.getElementById('error');
     const errorTitle = document.getElementById('error-title');
     
-    errorTitle.textContent = message;
-    errorDiv.style.display = 'block';
+    if (errorTitle) {
+        errorTitle.textContent = message;
+    }
+    if (errorDiv) {
+        errorDiv.style.display = 'block';
+    }
+    
+    // También mostrar notificación
+    if (window.NotificationManager) {
+        window.NotificationManager.showError(message);
+    }
 }
 
 function showFoundPet(pet) {
@@ -160,7 +169,7 @@ function showFoundPet(pet) {
                  style="width: 100%; height: 200px; object-fit: cover; border-radius: 0.5rem;">
         `;
     } else {
-        const emoji = getSpeciesEmoji(pet.species);
+        const emoji = window.getSpeciesEmoji ? window.getSpeciesEmoji(pet.species) : '🐾';
         petImageContainer.innerHTML = `
             <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #fed7aa, #fde68a); 
                         border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;">
@@ -193,15 +202,4 @@ function showFoundPet(pet) {
     foundDiv.style.display = 'block';
 }
 
-function getSpeciesEmoji(species) {
-    const emojis = {
-        'perro': '🐕',
-        'gato': '🐱',
-        'ave': '🐦',
-        'conejo': '🐰',
-        'pez': '🐟',
-        'reptil': '🦎',
-        'hamster': '🐹'
-    };
-    return emojis[species.toLowerCase()] || '🐾';
-}
+// getSpeciesEmoji ahora está en utils.js

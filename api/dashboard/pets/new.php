@@ -93,5 +93,6 @@ include '../../includes/header.php';
     </div>
 </div>
 
+<script src="/assets/js/utils.js"></script>
 <script src="/assets/js/pets.js"></script>
 <?php include '../../includes/footer.php'; ?>
