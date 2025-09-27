@@ -5,6 +5,41 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorDiv = document.getElementById('error');
     const foundDiv = document.getElementById('found');
     
+    // Elementos NFC
+    const nfcSupport = document.getElementById('nfcSupport');
+    const noNfcSupport = document.getElementById('noNfcSupport');
+    const nfcActive = document.getElementById('nfcActive');
+    const enableNFC = document.getElementById('enableNFC');
+    const stopNFC = document.getElementById('stopNFC');
+    
+    let nfcScanner = null;
+    
+    // Inicializar NFC
+    if (window.NFCScanner) {
+        nfcScanner = new NFCScanner({
+            onSuccess: (code) => {
+                rfidInput.value = code;
+                handleScan();
+            },
+            onError: (error) => {
+                console.error('NFC Error:', error);
+                if (window.NotificationManager) {
+                    NotificationManager.showError(error);
+                }
+            },
+            onStatusChange: (status) => {
+                updateNFCStatus(status);
+            }
+        });
+        
+        // Verificar soporte NFC
+        if (nfcScanner.isNFCSupported()) {
+            if (nfcSupport) nfcSupport.style.display = 'block';
+        } else {
+            if (noNfcSupport) noNfcSupport.style.display = 'block';
+        }
+    }
+    
     if (scanButton) {
         scanButton.addEventListener('click', handleScan);
     }
@@ -18,6 +53,34 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Auto-focus en el campo RFID
         rfidInput.focus();
+    }
+    
+    // Botones NFC
+    if (enableNFC) {
+        enableNFC.addEventListener('click', () => {
+            if (nfcScanner) {
+                nfcScanner.startScanning();
+            }
+        });
+    }
+    
+    if (stopNFC) {
+        stopNFC.addEventListener('click', () => {
+            if (nfcScanner) {
+                nfcScanner.stopScanning();
+            }
+        });
+    }
+    
+    // Función para actualizar estado visual de NFC
+    function updateNFCStatus(status) {
+        if (status.includes('activo')) {
+            if (nfcSupport) nfcSupport.style.display = 'none';
+            if (nfcActive) nfcActive.style.display = 'block';
+        } else if (status.includes('detenido')) {
+            if (nfcActive) nfcActive.style.display = 'none';
+            if (nfcSupport) nfcSupport.style.display = 'block';
+        }
     }
 });
 

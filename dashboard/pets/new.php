@@ -33,19 +33,102 @@ include '../../includes/header.php';
                 <div id="success-message" style="display: none;"></div>
                 <div id="error-message" style="display: none;"></div>
                 
-                <!-- Escáner RFID -->
+                <!-- Escáner RFID/NFC -->
                 <div class="form-group">
-                    <label class="form-label">🏷️ Tag RFID de la mascota *</label>
+                    <label class="form-label">🏷️ Tag RFID/NFC de la mascota *</label>
+                    
+                    <!-- Detección de compatibilidad NFC -->
+                    <div id="nfcSupport" class="mb-3" style="display: none;">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-green-600">📱</span>
+                                <span class="text-sm font-medium text-green-800">NFC Disponible</span>
+                            </div>
+                            <p class="text-xs text-green-700 mb-2">Tu dispositivo puede escanear tags NFC automáticamente</p>
+                            <button type="button" id="enableNFC" class="btn btn-secondary btn-sm">
+                                📡 Activar Escáner NFC
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="noNfcSupport" class="mb-3" style="display: none;">
+                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-orange-600">⚠️</span>
+                                <span class="text-sm font-medium text-orange-800">NFC No Disponible</span>
+                            </div>
+                            <p class="text-xs text-orange-700">Usa Chrome en Android o ingresa el código manualmente</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Información específica para iOS -->
+                    <div id="iosInfo" class="mb-3" style="display: none;">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-blue-600">📱</span>
+                                <span class="text-sm font-medium text-blue-800">iPhone/iPad Detectado</span>
+                            </div>
+                            <p class="text-xs text-blue-700 mb-2">
+                                iOS no soporta escaneo NFC directo, pero puedes:
+                            </p>
+                            <div class="space-y-1 text-xs text-blue-700">
+                                <div class="flex items-start gap-2">
+                                    <span>✍️</span>
+                                    <span>Escribir el código manualmente (recomendado)</span>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <span>📷</span>
+                                    <span>Escanear códigos QR con la cámara</span>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <a href="/ios-nfc-guide" class="text-blue-600 hover:text-blue-500 text-xs underline">
+                                    📖 Ver guía completa para iOS
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Estado de escáner NFC activo -->
+                    <div id="nfcActive" class="mb-3" style="display: none;">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="nfc-animation">
+                                        <div class="nfc-waves">
+                                            <div class="wave"></div>
+                                            <div class="wave"></div>
+                                            <div class="wave"></div>
+                                        </div>
+                                        <span class="text-blue-600">📱</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-800">Escáner NFC Activo</p>
+                                        <p class="text-xs text-blue-700">Acerca el tag NFC al teléfono</p>
+                                    </div>
+                                </div>
+                                <button type="button" id="stopNFC" class="btn btn-secondary btn-sm">
+                                    ⏹️ Detener
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Campo de entrada -->
                     <div class="flex gap-2">
                         <input type="text" class="form-input" id="rfidTag" name="rfidTag" 
-                               placeholder="Escanea el llavero RFID de tu mascota" required style="flex: 1;">
+                               placeholder="Escanea con NFC o ingresa el código manualmente" required style="flex: 1;">
                         <button type="button" id="rfidScannerBtn" class="btn btn-primary" style="min-width: 120px;">
                             🏷️ Escanear
                         </button>
                     </div>
                     <div id="rfid-confirmation"></div>
                     <small class="form-help">
-                        💡 Coloca el llavero RFID cerca del escáner o ingresa el código manualmente
+                        💡 <strong>Con NFC:</strong> Acerca el tag al teléfono | <strong>Sin NFC:</strong> Escribe el código manualmente
+                        <br>
+                        <a href="/nfc-tags-info" class="text-blue-600 hover:text-blue-500 text-xs">
+                            📖 ¿No tienes etiqueta NFC? Aprende más aquí
+                        </a>
                     </small>
                 </div>
 
@@ -204,11 +287,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const removePhoto = document.getElementById('removePhoto');
     const imageUrl = document.getElementById('imageUrl');
     
+    // Elementos NFC
+    const nfcSupport = document.getElementById('nfcSupport');
+    const noNfcSupport = document.getElementById('noNfcSupport');
+    const iosInfo = document.getElementById('iosInfo');
+    const nfcActive = document.getElementById('nfcActive');
+    const enableNFC = document.getElementById('enableNFC');
+    const stopNFC = document.getElementById('stopNFC');
+    
     let stream = null;
     let capturedImageBlob = null;
+    let nfcIntegration = null;
 
     // Auto-focus en el campo RFID
     rfidInput.focus();
+
+    // Inicializar integración NFC
+    initNFCIntegration();
 
     // Manejar escáner RFID
     rfidScannerBtn.addEventListener('click', function() {
@@ -221,6 +316,10 @@ document.addEventListener('DOMContentLoaded', function() {
             handleRFIDScan();
         }
     });
+
+    // Botones NFC
+    if (enableNFC) enableNFC.addEventListener('click', () => nfcIntegration?.startNFCScanning());
+    if (stopNFC) stopNFC.addEventListener('click', () => nfcIntegration?.stopNFCScanning());
 
     // Manejar cámara
     if (openCamera) {
@@ -338,6 +437,11 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // Detener NFC si está activo
+        if (nfcIntegration) {
+            nfcIntegration.stopNFCScanning();
+        }
+        
         // Simular escaneo exitoso
         rfidScannerBtn.disabled = true;
         rfidScannerBtn.innerHTML = '<span class="loading-spinner"></span> Escaneando...';
@@ -358,6 +462,50 @@ document.addEventListener('DOMContentLoaded', function() {
             // Focus en el siguiente campo
             document.getElementById('name').focus();
         }, 1000);
+    }
+
+    // Inicializar integración NFC
+    function initNFCIntegration() {
+        nfcIntegration = new FormNFCIntegration('petForm', 'rfidTag', {
+            onScanSuccess: (code) => {
+                // Validar automáticamente después del escaneo
+                setTimeout(() => {
+                    handleRFIDScan();
+                }, 500);
+            },
+            onScanError: (error) => {
+                console.error('NFC Error:', error);
+            },
+            onScanStatus: (status) => {
+                updateNFCStatus(status);
+            }
+        });
+
+        // Verificar soporte y mostrar interfaz apropiada
+        const deviceInfo = nfcIntegration.getDeviceInfo();
+        const recommendations = nfcIntegration.getRecommendations();
+        
+        if (deviceInfo.isIOS) {
+            iosInfo.style.display = 'block';
+            console.log('📱 iOS detectado - NFC no soportado');
+        } else if (nfcIntegration.isNFCSupported()) {
+            nfcSupport.style.display = 'block';
+            console.log('✅ NFC soportado');
+        } else {
+            noNfcSupport.style.display = 'block';
+            console.log('❌ NFC no soportado');
+        }
+    }
+
+    // Actualizar estado visual de NFC
+    function updateNFCStatus(status) {
+        if (status.includes('activo')) {
+            nfcSupport.style.display = 'none';
+            nfcActive.style.display = 'block';
+        } else if (status.includes('detenido')) {
+            nfcActive.style.display = 'none';
+            nfcSupport.style.display = 'block';
+        }
     }
 
     function closeCameraStream() {
@@ -551,6 +699,81 @@ document.addEventListener('DOMContentLoaded', function() {
     padding-right: 2.5rem;
 }
 
+/* Animaciones NFC */
+.nfc-animation {
+    position: relative;
+    display: inline-block;
+}
+
+.nfc-waves {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    pointer-events: none;
+}
+
+.wave {
+    position: absolute;
+    border: 2px solid #3b82f6;
+    border-radius: 50%;
+    opacity: 0;
+    animation: nfc-pulse 2s infinite;
+}
+
+.wave:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.wave:nth-child(2) {
+    animation-delay: 0.5s;
+}
+
+.wave:nth-child(3) {
+    animation-delay: 1s;
+}
+
+@keyframes nfc-pulse {
+    0% {
+        width: 10px;
+        height: 10px;
+        opacity: 1;
+        top: 15px;
+        left: 15px;
+    }
+    100% {
+        width: 40px;
+        height: 40px;
+        opacity: 0;
+        top: 0;
+        left: 0;
+    }
+}
+
+/* Animación de entrada */
+@keyframes slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.animate-slide-in {
+    animation: slide-in 0.3s ease-out;
+}
+
+/* Botón de tamaño pequeño */
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .grid-cols-2 {
@@ -569,10 +792,36 @@ document.addEventListener('DOMContentLoaded', function() {
         width: 100%;
         max-width: 320px;
     }
+    
+    .nfc-waves {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .wave {
+        animation-duration: 1.5s;
+    }
+    
+    @keyframes nfc-pulse {
+        0% {
+            width: 8px;
+            height: 8px;
+            opacity: 1;
+            top: 11px;
+            left: 11px;
+        }
+        100% {
+            width: 30px;
+            height: 30px;
+            opacity: 0;
+            top: 0;
+            left: 0;
+        }
+    }
 }
 </style>
 
 <?php 
-$additionalScripts = ['/assets/js/pets.js'];
+$additionalScripts = ['/assets/js/nfc-scanner.js', '/assets/js/nfc-fallback.js', '/assets/js/pets.js'];
 include '../../includes/footer.php'; 
 ?>

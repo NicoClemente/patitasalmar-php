@@ -17,6 +17,7 @@ $base_url = '/patitasalmar-php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($pageTitle) ? htmlspecialchars($pageTitle) . ' - ' : ''; ?>PatitasAlMar</title>
     <link rel="stylesheet" href="<?php echo $base_url; ?>/assets/css/style.css">
+    <link rel="stylesheet" href="<?php echo $base_url; ?>/assets/css/responsive.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -33,11 +34,11 @@ $base_url = '/patitasalmar-php';
     <meta property="og:url" content="<?php echo (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; ?>">
 </head>
 <body>
-    <?php if ($isLoggedIn && !isset($hideHeader)): ?>
+    <?php if (!$isLoggedIn || !isset($hideHeader)): ?>
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <a href="<?php echo $base_url; ?>/dashboard" class="logo">
+                <a href="<?php echo $base_url; ?>/" class="logo">
                     <span class="logo-icon">🐾</span>
                     <div class="logo-text">
                         <div class="logo-title">PatitasAlMar</div>
@@ -45,6 +46,8 @@ $base_url = '/patitasalmar-php';
                     </div>
                 </a>
                 
+                <?php if ($isLoggedIn): ?>
+                <!-- Navegación para usuarios logueados -->
                 <nav class="nav">
                     <a href="<?php echo $base_url; ?>/dashboard" class="nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/dashboard') !== false && strpos($_SERVER['REQUEST_URI'], '/dashboard/') === false ? 'active' : ''; ?>">Dashboard</a>
                     <a href="<?php echo $base_url; ?>/dashboard/pets" class="nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/dashboard/pets') !== false ? 'active' : ''; ?>">Mascotas</a>
@@ -61,9 +64,21 @@ $base_url = '/patitasalmar-php';
                     </div>
                     <a href="<?php echo $base_url; ?>/logout" class="btn-logout">Salir</a>
                 </div>
+                <?php else: ?>
+                <!-- Navegación para usuarios no logueados -->
+                <nav class="nav">
+                    <a href="<?php echo $base_url; ?>/" class="nav-link <?php echo $_SERVER['REQUEST_URI'] === '/patitasalmar-php/' || $_SERVER['REQUEST_URI'] === '/patitasalmar-php' ? 'active' : ''; ?>">Inicio</a>
+                    <a href="<?php echo $base_url; ?>/rfid-scanner" class="nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/rfid-scanner') !== false ? 'active' : ''; ?>">Escáner</a>
+                    <a href="<?php echo $base_url; ?>/register" class="nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/register') !== false ? 'active' : ''; ?>">Registrar</a>
+                </nav>
+                
+                <div class="user-menu">
+                    <a href="<?php echo $base_url; ?>/login" class="btn btn-ghost">Iniciar Sesión</a>
+                </div>
+                <?php endif; ?>
 
                 <!-- Botón menú móvil -->
-                <button class="mobile-menu-btn" id="mobile-menu-btn" style="display: none;">
+                <button class="mobile-menu-btn" id="mobile-menu-btn">
                     <span></span>
                     <span></span>
                     <span></span>
@@ -71,13 +86,15 @@ $base_url = '/patitasalmar-php';
             </div>
             
             <!-- Navegación móvil -->
-            <nav class="mobile-nav hidden" id="mobile-nav">
+            <nav class="mobile-nav" id="mobile-nav">
                 <div class="mobile-nav-content">
-                    <a href="<?php echo $base_url; ?>/dashboard" class="mobile-nav-link">📊 Dashboard</a>
-                    <a href="<?php echo $base_url; ?>/dashboard/pets" class="mobile-nav-link">🐾 Mascotas</a>
-                    <a href="<?php echo $base_url; ?>/rfid-scanner" class="mobile-nav-link">🔍 Escáner</a>
+                    <?php if ($isLoggedIn): ?>
+                    <!-- Menú móvil para usuarios logueados -->
+                    <a href="<?php echo $base_url; ?>/dashboard" class="mobile-nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/dashboard') !== false && strpos($_SERVER['REQUEST_URI'], '/dashboard/') === false ? 'active' : ''; ?>">📊 Dashboard</a>
+                    <a href="<?php echo $base_url; ?>/dashboard/pets" class="mobile-nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/dashboard/pets') !== false ? 'active' : ''; ?>">🐾 Mascotas</a>
+                    <a href="<?php echo $base_url; ?>/rfid-scanner" class="mobile-nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/rfid-scanner') !== false ? 'active' : ''; ?>">🔍 Escáner</a>
                     <?php if ($user['role'] === 'admin'): ?>
-                        <a href="<?php echo $base_url; ?>/dashboard/users" class="mobile-nav-link">👥 Usuarios</a>
+                        <a href="<?php echo $base_url; ?>/dashboard/users" class="mobile-nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/dashboard/users') !== false ? 'active' : ''; ?>">👥 Usuarios</a>
                     <?php endif; ?>
                     <div class="mobile-nav-divider"></div>
                     <div class="mobile-nav-user">
@@ -85,6 +102,14 @@ $base_url = '/patitasalmar-php';
                         <span>(<?php echo $user['role'] === 'admin' ? 'Admin' : 'Usuario'; ?>)</span>
                     </div>
                     <a href="<?php echo $base_url; ?>/logout" class="mobile-nav-link text-red-600">🚪 Cerrar Sesión</a>
+                    <?php else: ?>
+                    <!-- Menú móvil para usuarios no logueados -->
+                    <a href="<?php echo $base_url; ?>/" class="mobile-nav-link <?php echo $_SERVER['REQUEST_URI'] === '/patitasalmar-php/' || $_SERVER['REQUEST_URI'] === '/patitasalmar-php' ? 'active' : ''; ?>">🏠 Inicio</a>
+                    <a href="<?php echo $base_url; ?>/rfid-scanner" class="mobile-nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/rfid-scanner') !== false ? 'active' : ''; ?>">🔍 Escáner</a>
+                    <a href="<?php echo $base_url; ?>/register" class="mobile-nav-link <?php echo strpos($_SERVER['REQUEST_URI'], '/register') !== false ? 'active' : ''; ?>">📝 Registrar</a>
+                    <div class="mobile-nav-divider"></div>
+                    <a href="<?php echo $base_url; ?>/login" class="mobile-nav-link">👤 Iniciar Sesión</a>
+                    <?php endif; ?>
                 </div>
             </nav>
         </div>
@@ -97,15 +122,16 @@ $base_url = '/patitasalmar-php';
         const mobileNav = document.getElementById('mobile-nav');
         
         if (mobileMenuBtn && mobileNav) {
-            mobileMenuBtn.addEventListener('click', function() {
-                mobileNav.classList.toggle('hidden');
+            mobileMenuBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                mobileNav.classList.toggle('show');
                 this.classList.toggle('active');
             });
             
             // Cerrar menú al hacer click fuera
             document.addEventListener('click', function(e) {
                 if (!mobileMenuBtn.contains(e.target) && !mobileNav.contains(e.target)) {
-                    mobileNav.classList.add('hidden');
+                    mobileNav.classList.remove('show');
                     mobileMenuBtn.classList.remove('active');
                 }
             });
@@ -114,26 +140,11 @@ $base_url = '/patitasalmar-php';
             const mobileNavLinks = mobileNav.querySelectorAll('.mobile-nav-link');
             mobileNavLinks.forEach(link => {
                 link.addEventListener('click', function() {
-                    mobileNav.classList.add('hidden');
+                    mobileNav.classList.remove('show');
                     mobileMenuBtn.classList.remove('active');
                 });
             });
         }
-        
-        // Mostrar botón móvil en pantallas pequeñas
-        function toggleMobileMenu() {
-            if (window.innerWidth <= 768) {
-                if (mobileMenuBtn) mobileMenuBtn.style.display = 'block';
-                document.querySelector('.nav').style.display = 'none';
-            } else {
-                if (mobileMenuBtn) mobileMenuBtn.style.display = 'none';
-                document.querySelector('.nav').style.display = 'flex';
-                mobileNav.classList.add('hidden');
-            }
-        }
-        
-        toggleMobileMenu();
-        window.addEventListener('resize', toggleMobileMenu);
     });
     </script>
     <?php endif; ?>

@@ -6,20 +6,21 @@ include '../includes/header.php';
 
 <div class="paw-pattern" style="min-height: 100vh; padding: 3rem 0;">
     <div class="container">
-        <div style="max-width: 700px; margin: 0 auto;">
+        <div class="scanner-container">           
+            
             <!-- Header -->
             <div class="text-center mb-8">
                 <div class="animate-float mb-4">
-                    <span style="font-size: 4rem;">🔍</span>
+                    <span class="scanner-icon">🔍</span>
                 </div>
-                <h1 class="text-4xl font-bold text-gray-800 mb-4">Escáner RFID/NFC</h1>
-                <p class="text-gray-600 mb-4">
+                <h1 class="text-5xl font-bold text-gray-800 mb-4">Escáner RFID/NFC</h1>
+                <p class="text-gray-600 mb-6 text-lg">
                     Escanea el tag RFID/NFC para encontrar información de la mascota perdida
                 </p>
-                <div class="flex justify-center gap-4 text-sm">
-                    <a href="/patitasalmar-php/" class="text-blue-600 hover:text-blue-500">← Volver al inicio</a>
-                    <span class="text-gray-300">|</span>
-                    <a href="/patitasalmar-php/login" class="text-blue-600 hover:text-blue-500">¿Tienes cuenta?</a>
+                <div class="flex justify-center gap-6 text-sm flex-wrap">
+                    <a href="/patitasalmar-php/register" class="text-blue-600 hover:text-blue-500 font-medium">📝 Registrar Mascota</a>
+                    <span class="text-gray-300 hidden-mobile">|</span>
+                    <a href="/patitasalmar-php/login" class="text-blue-600 hover:text-blue-500 font-medium">👤 ¿Tienes cuenta?</a>
                 </div>
             </div>
 
@@ -68,32 +69,32 @@ include '../includes/header.php';
             </div>
 
             <!-- Escáner manual -->
-            <div class="card mb-6" style="border: 2px solid #3b82f6;">
-                <div class="text-center mb-4">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-2">🏷️ Ingresa el código RFID/NFC</h3>
-                    <p class="text-gray-600 text-sm">También puedes escribir el código manualmente</p>
+            <div class="card mb-6 scanner-card">
+                <div class="text-center mb-6">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-3">🏷️ Ingresa el código RFID/NFC</h3>
+                    <p class="text-gray-600 text-lg">También puedes escribir el código manualmente</p>
                 </div>
                 
-                <div class="space-y-4">
-                    <div class="flex gap-2">
-                        <input type="text" id="rfidInput" class="form-input text-center text-lg font-mono" 
-                               placeholder="Ej: LUNA001, PET1234, etc." maxlength="50" style="flex: 1;">
-                        <button id="scanButton" class="btn btn-primary text-lg px-6">
+                <div class="space-y-6">
+                    <div class="scanner-input-group">
+                        <input type="text" id="rfidInput" class="scanner-input" 
+                               placeholder="Ej: LUNA001, PET1234, etc." maxlength="50">
+                        <button id="scanButton" class="scanner-btn">
                             🔍 Buscar
                         </button>
                     </div>
                     
                     <div class="text-center">
-                        <p class="text-gray-500 text-sm mb-2">
+                        <p class="text-gray-500 text-base mb-4">
                             💡 El código puede estar en texto o grabado en el tag
                         </p>
                         
                         <!-- Botones de método de escaneo -->
-                        <div class="flex gap-2 justify-center mt-3">
-                            <button id="nfcScanBtn" class="btn btn-secondary btn-sm" style="display: none;">
+                        <div class="scanner-buttons">
+                            <button id="nfcScanBtn" class="btn btn-secondary" style="display: none;">
                                 📱 Escanear NFC
                             </button>
-                            <button id="cameraScanBtn" class="btn btn-secondary btn-sm">
+                            <button id="cameraScanBtn" class="btn btn-secondary">
                                 📷 Escanear QR
                             </button>
                         </div>
@@ -123,11 +124,11 @@ include '../includes/header.php';
                 </div>
             </div>
 
-            <div id="found" class="card" style="display: none; border: 2px solid #16a34a;">
-                <div class="text-center mb-6">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
-                    <h3 class="text-2xl font-semibold text-green-700 mb-1">¡Mascota encontrada!</h3>
-                    <p class="text-green-600">Información de contacto del dueño</p>
+            <div id="found" class="card" style="display: none; border: 2px solid #16a34a; box-shadow: 0 10px 25px -5px rgba(34, 197, 94, 0.1);">
+                <div class="text-center mb-8">
+                    <div style="font-size: 4rem; margin-bottom: 1.5rem; animation: bounce 1s ease-in-out;">✅</div>
+                    <h3 class="text-3xl font-semibold text-green-700 mb-2">¡Mascota encontrada!</h3>
+                    <p class="text-green-600 text-lg">Información de contacto del dueño</p>
                 </div>
 
                 <div class="grid md:grid-cols-2 gap-6">
@@ -1108,6 +1109,34 @@ a.text-blue-600:hover {
     }
 }
 
+/* Animaciones mejoradas */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Mejoras para el input RFID */
+#rfidInput:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px -5px rgba(59, 130, 246, 0.2);
+    border-color: #3b82f6;
+}
+
+#scanButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px -5px rgba(59, 130, 246, 0.4);
+}
+
 /* Indicadores de estado adicionales */
 .status-indicator {
     display: inline-block;
@@ -1140,9 +1169,105 @@ a.text-blue-600:hover {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
 }
+
+/* Estilos específicos para el escáner */
+.scanner-icon {
+    font-size: 5rem;
+}
+
+.scanner-card {
+    border: 2px solid #3b82f6;
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1);
+}
+
+.scanner-input-group {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.scanner-input {
+    flex: 1;
+    padding: 1rem;
+    font-size: 1.25rem;
+    text-align: center;
+    letter-spacing: 1px;
+    font-family: monospace;
+}
+
+.scanner-btn {
+    padding: 1rem 2rem;
+    font-size: 1.25rem;
+    white-space: nowrap;
+}
+
+.scanner-buttons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Centrado perfecto para escáner - usando estilos del CSS responsive */
+
+/* Responsive mejorado */
+@media (max-width: 767px) {
+    .scanner-container {
+        padding: 0 0.5rem;
+    }
+    
+    .text-5xl {
+        font-size: 2.5rem;
+    }
+    
+    .scanner-input-group {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .scanner-input {
+        font-size: 1.1rem;
+        padding: 0.875rem;
+    }
+    
+    .scanner-btn {
+        font-size: 1.1rem;
+        padding: 0.875rem 1.5rem;
+    }
+    
+    .scanner-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .scanner-buttons .btn {
+        width: 100%;
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 479px) {
+    .text-5xl {
+        font-size: 2rem;
+    }
+    
+    .scanner-icon {
+        font-size: 3rem;
+    }
+    
+    .scanner-input {
+        font-size: 1rem;
+        padding: 0.75rem;
+    }
+    
+    .scanner-btn {
+        font-size: 1rem;
+        padding: 0.75rem 1.25rem;
+    }
+}
 </style>
 
 <?php 
-$additionalScripts = ['/patitasalmar-php/assets/js/rfid-scanner.js'];
+$additionalScripts = ['/patitasalmar-php/assets/js/nfc-scanner.js', '/patitasalmar-php/assets/js/rfid-scanner.js'];
 include '../includes/footer.php'; 
 ?>

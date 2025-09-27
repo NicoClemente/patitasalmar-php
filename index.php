@@ -7,53 +7,8 @@ if (isset($_SESSION['user'])) {
 }
 
 $pageTitle = "Inicio";
-$hideHeader = true;
+include 'includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PatitasAlMar - Sistema de Identificación de Mascotas</title>
-    <link rel="stylesheet" href="/patitasalmar-php/assets/css/style.css">
-    <meta name="description" content="Sistema inteligente de identificación de mascotas con tecnología RFID - Las Grutas, Río Negro">
-    <meta name="keywords" content="mascotas, RFID, identificación, Las Grutas, Río Negro, perros, gatos">
-    
-    <!-- Open Graph para redes sociales -->
-    <meta property="og:title" content="PatitasAlMar - Sistema de Identificación de Mascotas">
-    <meta property="og:description" content="Sistema inteligente de identificación y gestión de mascotas con tecnología RFID - Las Grutas, Río Negro">
-    <meta property="og:type" content="website">
-    
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐾</text></svg>">
-</head>
-<body>
-    <div class="app-container">
-        <!-- HEADER -->
-        <header class="header">
-            <div class="container">
-                <div class="header-content">
-                    <a href="/patitasalmar-php/" class="logo">
-                        <div class="logo-icon">🐾</div>
-                        <div class="logo-text">
-                            <h1>PatitasAlMar</h1>
-                            <p>Las Grutas</p>
-                        </div>
-                    </a>
-                    
-                    <nav class="nav">
-                        <a href="/patitasalmar-php/" class="nav-link active">Inicio</a>
-                        <a href="/patitasalmar-php/rfid-scanner" class="nav-link">Escáner</a>
-                        <a href="/patitasalmar-php/register" class="nav-link">Registrar</a>
-                        <a href="/patitasalmar-php/login" class="nav-link">Dashboard</a>
-                    </nav>
-                    
-                    <div class="flex items-center gap-4">
-                        <a href="/patitasalmar-php/login" class="btn btn-ghost">Iniciar Sesión</a>
-                    </div>
-                </div>
-            </div>
-        </header>
 
         <!-- HERO SECTION -->
         <section class="hero">
@@ -91,30 +46,30 @@ $hideHeader = true;
                 <div class="grid grid-cols-3">
                     <div class="card feature-card">
                         <div class="feature-icon">🏠</div>
-                        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--gray-800);">
+                        <h3 class="feature-title">
                             Registro Fácil
                         </h3>
-                        <p style="color: var(--gray-600);">
+                        <p class="feature-description">
                             Registra a tus mascotas con información detallada, fotos y tags RFID únicos
                         </p>
                     </div>
                     
                     <div class="card feature-card">
                         <div class="feature-icon">🌊</div>
-                        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--gray-800);">
+                        <h3 class="feature-title">
                             Tecnología RFID
                         </h3>
-                        <p style="color: var(--gray-600);">
+                        <p class="feature-description">
                             Identifica mascotas perdidas al instante con chips RFID resistentes al agua
                         </p>
                     </div>
                     
                     <div class="card feature-card">
                         <div class="feature-icon">👨‍⚕️</div>
-                        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--gray-800);">
+                        <h3 class="feature-title">
                             Gestión Completa
                         </h3>
-                        <p style="color: var(--gray-600);">
+                        <p class="feature-description">
                             Panel administrativo para municipio, veterinarios y dueños
                         </p>
                     </div>
@@ -247,11 +202,11 @@ $hideHeader = true;
                 </div>
                 
                 <div class="grid grid-cols-2">
-                    <div class="card" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 2px solid var(--primary-light);">
-                        <h4 style="color: var(--primary-dark); font-weight: 700; margin-bottom: 1rem;">
+                    <div class="card instruction-card instruction-card-primary">
+                        <h4 class="instruction-title">
                             🔍 ¿Cómo usar el escáner?
                         </h4>
-                        <ol style="color: var(--primary-dark); font-size: 0.9rem; line-height: 1.8; padding-left: 1.5rem;">
+                        <ol class="instruction-list">
                             <li>Busca el collar de la mascota</li>
                             <li>Encuentra el tag RFID (pequeño llavero)</li>
                             <li>Ingresa el código que aparece en el tag</li>
@@ -260,11 +215,11 @@ $hideHeader = true;
                         </ol>
                     </div>
                     
-                    <div class="card" style="background: linear-gradient(135deg, #fefce8, #fef3c7); border: 2px solid var(--warning);">
-                        <h4 style="color: #92400e; font-weight: 700; margin-bottom: 1rem;">
+                    <div class="card instruction-card instruction-card-warning">
+                        <h4 class="instruction-title">
                             ⚠️ ¿No funciona?
                         </h4>
-                        <ul style="color: #92400e; font-size: 0.9rem; line-height: 1.8; padding-left: 1.5rem;">
+                        <ul class="instruction-list">
                             <li>Verifica que hayas escrito bien el código</li>
                             <li>El tag puede estar dañado o sucio</li>
                             <li>La mascota puede no estar registrada</li>
@@ -404,11 +359,141 @@ $hideHeader = true;
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
             }
+            
+            /* Estilos específicos para la página principal */
+            .feature-title {
+                font-size: 1.25rem;
+                font-weight: 700;
+                margin-bottom: 0.5rem;
+                color: var(--gray-800);
+            }
+            
+            .feature-description {
+                color: var(--gray-600);
+            }
+            
+            .instruction-card {
+                padding: 1.5rem;
+            }
+            
+            .instruction-card-primary {
+                background: linear-gradient(135deg, #eff6ff, #dbeafe);
+                border: 2px solid var(--primary-light);
+            }
+            
+            .instruction-card-warning {
+                background: linear-gradient(135deg, #fefce8, #fef3c7);
+                border: 2px solid var(--warning);
+            }
+            
+            .instruction-title {
+                font-weight: 700;
+                margin-bottom: 1rem;
+            }
+            
+            .instruction-card-primary .instruction-title {
+                color: var(--primary-dark);
+            }
+            
+            .instruction-card-warning .instruction-title {
+                color: #92400e;
+            }
+            
+            .instruction-list {
+                font-size: 0.9rem;
+                line-height: 1.8;
+                padding-left: 1.5rem;
+            }
+            
+            .instruction-card-primary .instruction-list {
+                color: var(--primary-dark);
+            }
+            
+            .instruction-card-warning .instruction-list {
+                color: #92400e;
+            }
+            
+            /* Responsive para la página principal */
+            @media (max-width: 767px) {
+                .grid.grid-cols-2 {
+                    grid-template-columns: 1fr;
+                }
+                
+                .grid.grid-cols-3 {
+                    grid-template-columns: 1fr;
+                }
+                
+                .hero-content h1 {
+                    font-size: 2.5rem;
+                }
+                
+                .hero-content p {
+                    font-size: 1rem;
+                }
+                
+                .flex.justify-center.gap-4 {
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 1rem;
+                }
+                
+                .flex.justify-center.gap-4 .btn {
+                    width: 100%;
+                    max-width: 300px;
+                }
+            }
+            
+            @media (max-width: 479px) {
+                .hero-content h1 {
+                    font-size: 2rem;
+                }
+                
+                .feature-title {
+                    font-size: 1.125rem;
+                }
+                
+                .instruction-card {
+                    padding: 1rem;
+                }
+                
+                .instruction-list {
+                    font-size: 0.875rem;
+                }
+            }
         `;
         document.head.appendChild(style);
         
         // Funcionalidad adicional
         window.addEventListener('load', function() {
+            // Manejo del menú móvil
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileNav = document.getElementById('mobile-nav');
+            
+            if (mobileMenuBtn && mobileNav) {
+                mobileMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mobileNav.classList.toggle('show');
+                    this.classList.toggle('active');
+                });
+                
+                // Cerrar menú al hacer click fuera
+                document.addEventListener('click', function(e) {
+                    if (!mobileMenuBtn.contains(e.target) && !mobileNav.contains(e.target)) {
+                        mobileNav.classList.remove('show');
+                        mobileMenuBtn.classList.remove('active');
+                    }
+                });
+                
+                // Cerrar menú al hacer click en un enlace
+                const mobileNavLinks = mobileNav.querySelectorAll('.mobile-nav-link');
+                mobileNavLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileNav.classList.remove('show');
+                        mobileMenuBtn.classList.remove('active');
+                    });
+                });
+            }
+            
             // Auto-focus en el campo RFID cuando se scrollea a la sección
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
